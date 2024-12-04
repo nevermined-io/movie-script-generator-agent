@@ -54,7 +54,7 @@ Getting Started
 1.  **Clone the repository**:
     
     ```bash
-    git clone https://github.com/your-org/script-generator-agent.git
+    git clone https://github.com/nevermined-io/movie-script-generator-agent.git
     cd script-generator-agent
     ```
     
