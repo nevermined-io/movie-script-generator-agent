@@ -18,7 +18,7 @@ export class ScriptGenerator {
   constructor(apiKey: string) {
     // Initialize the OpenAI language model
     const llm = new ChatOpenAI({
-      model: "gpt-3.5-turbo", // Choose the model for generating scripts
+      model: "gpt-4o-mini",
       apiKey,
     });
 

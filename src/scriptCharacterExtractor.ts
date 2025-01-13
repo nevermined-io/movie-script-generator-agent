@@ -15,9 +15,13 @@ export class ScriptCharacterExtractor {
     { script: string },
     Record<string, any>[]
   >;
+  private transformationChain: RunnableSequence<
+    { characters: string; script: string },
+    Record<string, any>[]
+  >;
 
   constructor(apiKey: string) {
-    const llm = new ChatOpenAI({ model: "gpt-3.5-turbo", apiKey });
+    const llm = new ChatOpenAI({ model: "gpt-4o-mini", apiKey });
 
     this.scriptChain = RunnableSequence.from([
       ChatPromptTemplate.fromTemplate(`
@@ -88,6 +92,41 @@ All the characters provided in the script should be extracted, even if they are 
       llm,
       new JsonOutputParser(),
     ]);
+
+    this.transformationChain = RunnableSequence.from([
+      ChatPromptTemplate.fromTemplate(`
+1.  Role: You are a “cinematic video prompt designer.”
+2.  Objective: Given a Characters JSON array and a movie script, generate an array of prompt strings. Each prompt is a rich, cinematic video description for a specific character.
+3.  Content for each prompt:
+    *   Include a detailed physical and clothing description if relevant.
+    *   Specify the setting (time period, location, type of movie, etc) and atmosphere (nighttime, eerie lighting, etc.).
+    *   Mention the character’s role (journalist, sheriff, villain, hero, etc.) and any key personality traits that impact the scene.
+    *   Add cinematic details: • Camera angle or framing (for example, “filmed from a low-angle shot” or “medium shot”).  
+        • Lens type (for example, “27mm lens,” “wide-angle lens”).  
+        • Movement or lighting details if they add drama (for example, “slow pan under the moonlight,” “soft, vintage glow,” etc.).
+    *   Do not include placeholders or the words “unknown” or “unnamed.” Omit irrelevant data.
+    *   Do not use JSON keys or field names in the final text; produce free-form descriptions.
+4.  Output format:
+    *   Return a JSON array of strings, with each string describing one character in the same order as the input.
+    *   Each string must be a self-contained cinematic description that can be used directly as a video generation prompt.
+5.  Example of desired style (for a character named Sarah, 30s, determined journalist):
+    *   “A cinematic video of a determined Caucasian woman in her 30s wearing a retro pencil skirt and cat-eye glasses. She stands in a 1950s town square under a looming alien invasion, illuminated by eerie moonlight. She is a brave journalist, captured from a low-angle shot with a 27mm lens to emphasize her resolve.”
+6.  Incorporate the script:
+    *   Use the provided script to guide the tone and time period and highlight any dramatic elements (alien invasion, nighttime setting, etc.).
+    *   Emphasize any scene-specific details if relevant to the character’s role or actions.
+7.  Return only the final JSON array of strings:
+    *   No extra explanations or placeholders.
+    *   Exactly one string per character in the same sequence they appear in the Characters JSON.
+
+Characters JSON:
+{characters}
+
+Script:
+{script}
+      `),
+      llm,
+      new JsonOutputParser(),
+    ]);
   }
 
   async generateScript(idea: string): Promise<string> {
@@ -96,5 +135,15 @@ All the characters provided in the script should be extracted, even if they are 
 
   async extractCharacters(script: string): Promise<object[]> {
     return await this.characterChain.invoke({ script });
+  }
+
+  async transformCharacters(
+    characters: object[],
+    script: string
+  ): Promise<object[]> {
+    return await this.transformationChain.invoke({
+      characters: JSON.stringify(characters),
+      script,
+    });
   }
 }
