@@ -98,6 +98,7 @@ async function handleScriptGeneration(
   try {
     const script = await extractor.generateScript(step.input_query);
 
+    logger.info(`Generated script: ${script}`);
     await payments.query.updateStep(step.did, {
       ...step,
       step_status: AgentExecutionStatus.Completed,
@@ -130,11 +131,13 @@ async function handleCharacterExtraction(
   try {
     const characters = await extractor.extractCharacters(step.input_query);
 
+    logger.info(`Extracted characters: ${JSON.stringify(characters)}`);
+
     await payments.query.updateStep(step.did, {
       ...step,
       step_status: AgentExecutionStatus.Completed,
-      output: "Agent execution completed successfully.",
-      output_artifacts: [{ script: step.input_query, characters: characters }],
+      output: step.input_query,
+      output_artifacts: [characters],
     });
 
     logMessage(payments, {
