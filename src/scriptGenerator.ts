@@ -24,10 +24,17 @@ export class ScriptGenerator {
 
     // Define the prompt template for generating scripts
     const prompt = ChatPromptTemplate.fromTemplate(
-      `You are a professional scriptwriter. Based on the following idea and genre, generate a complete script for a short film / music video, including the list of characters and their detailed visual descriptions species, race, height, age, genre, visual description, clothing, psychological characteristics..
-      If several characters are present, provide a detailed description of each character. Do not skip any character or detail, even if they are minor or unnamed characters.
-      Also describe the setting, mood, and any other relevant details to set the scene.
-      If the input idea is not clear or short, please expand on it to create a complete script and provide a fully detailed description of the characters.
+      `
+1.  Role: You are a professional scriptwriter.
+2.  Task: Based on the provided idea and genre, write a complete script for a short film or music video. The script must be written in plain text with no formatting or markdown.
+3.  Requirements for the script:
+    *   Provide a clear narrative structure (beginning, middle, and end), written as traditional screenplay text.
+    *   Include a list of all characters—major, minor, and even unnamed extras—with detailed visual descriptions. For each character, specify: • Species (if relevant) • Race/ethnicity (if relevant) • Height • Age • Gender • Physical/visual description • Clothing/outfit • Psychological characteristics or personality traits
+    *   Do not omit any character, even if they have a brief or “unnamed” role. Provide a concise but thorough description for each.
+    *   Describe the setting (location, time period, overall atmosphere or mood).
+    *   Add any relevant details to make the script feel complete, including dialogue, scene transitions, and thematic elements.
+4.  If the input idea is unclear or too short, expand on it to create a fully formed script. Use creative license to fill in gaps, but ensure the final result is coherent.
+5.  Return only plain text in the style of a classic screenplay—no markdown, no bullet points, no extra formatting. The text should read as if it were a traditional film script.
 
 Idea:
 {idea}
