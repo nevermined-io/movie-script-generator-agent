@@ -28,7 +28,7 @@ This project is part of a larger workflow that explores the interconnection betw
 
 #### Workflow Diagram:
 
-![[Init Step] --> [generateScript] --> [extractCharacters] --> [generateImagesForCharacters]](https://github.com/nevermined-io/movie-orchestrator-agent/blob/main/flow_img.png?raw=true)
+![[Init Step] --> [generateScript] --> [generateImagesForCharacters]](https://github.com/nevermined-io/movie-orchestrator-agent/blob/main/flow_img.png?raw=true)
 
 * * *
 
