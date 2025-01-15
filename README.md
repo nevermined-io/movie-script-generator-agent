@@ -15,16 +15,14 @@ This project is part of a larger workflow that explores the interconnection betw
 1.  [Movie Orchestrator Agent](https://github.com/nevermined-io/movie-orchestrator-agent):
     
     *   Coordinates the entire workflow, ensuring smooth task execution across agents.
+    
 2.  [Movie Script Generator Agent](https://github.com/nevermined-io/movie-script-generator-agent):
     
-    *   Generates movie scripts based on input ideas.
-3.  [Character Extractor Agent](https://github.com/nevermined-io/character-extractor-agent):
-    
-    *   Extracts character descriptions from movie scripts for further processing.
+    *   Generates movie scripts and characters descriptions based on input ideas.
 
-4.  [Image Generator Agent](https://github.com/nevermined-io/image-generator-agent):
+3.  [Video Generator Agent](https://github.com/nevermined-io/video-generator-agent):
     
-    *   Generates realistic character images based on their descriptions.
+    *   Generates realistic character videos based on their descriptions.
 
 #### Workflow Diagram:
 
