@@ -131,18 +131,26 @@ Project Structure
 ```plaintext
 script-generator-agent/
 ├── src/
-│   ├── main.ts               # Main entry point for the agent
-│   ├── scriptGenerator.ts    # Script generation logic using LangChain
-├── .env.example              # Example environment variables file
-├── package.json              # Project dependencies and scripts
-├── tsconfig.json             # TypeScript configuration
+│   ├── main.ts                       # Main entry point for the agent
+│   ├── scriptGenerator.ts            # Script generation logic using LangChain
+│   ├── scriptCharacterExtractor.ts   # CharacterExtraction logic using LangChain
+├── config/
+│   ├── env.ts                        # Environment import file
+├── logger/
+│   ├── logger.ts                     # Logging file
+├── steps/
+│   ├── stepHandler.ts                # File in charge of handling task steps
+├── .env.example                      # Example environment variables file
+├── package.json                      # Project dependencies and scripts
+├── tsconfig.json                     # TypeScript configuration
 ```
 
 ### Key Components:
 
 1.  **`main.ts`**: Handles task lifecycle, from receiving steps to sending back results.
 2.  **`scriptGenerator.ts`**: Implements the logic for generating scripts using LangChain and OpenAI.
-3.  **`.env`**: Stores sensitive configuration details like API keys and environment.
+2.  **`scriptCharacterGenerator.ts`**: Implements the logic for generating character descriptions using LangChain and OpenAI.
+4.  **`.env`**: Stores sensitive configuration details like API keys and environment.
 
 * * *
 
