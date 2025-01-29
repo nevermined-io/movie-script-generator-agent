@@ -1,71 +1,49 @@
 [![banner](https://raw.githubusercontent.com/nevermined-io/assets/main/images/logo/banner_logo.png)](https://nevermined.io)
 
-Script Generator Agent using Nevermined's Payments API (TypeScript)
-===================================================================
+Music Video Technical Script Generator Agent (TypeScript)
+=========================================================
 
-> A **TypeScript-based agent** that generates detailed film or music video scripts using OpenAI's API via LangChain. This agent integrates seamlessly with **Nevermined's Payments API**, enabling structured task handling and efficient billing through the Nevermined ecosystem.
-
-* * *
-
-Related Projects
-----------------
-
-This project is part of a larger workflow that explores the interconnection between agents and how can they communicate and work together. Please, refer to these projects in order to have a full view of the whole process
-
-1.  [Movie Orchestrator Agent](https://github.com/nevermined-io/movie-orchestrator-agent):
-    
-    *   Coordinates the entire workflow, ensuring smooth task execution across agents.
-    
-2.  [Movie Script Generator Agent](https://github.com/nevermined-io/movie-script-generator-agent):
-    
-    *   Generates movie scripts and characters descriptions based on input ideas.
-
-3.  [Video Generator Agent](https://github.com/nevermined-io/video-generator-agent):
-    
-    *   Generates realistic character videos based on their descriptions.
-
-#### Workflow Diagram:
-
-![[Init Step] --> [generateScript] --> [generateImagesForCharacters]](https://github.com/nevermined-io/movie-orchestrator-agent/blob/main/flow_img.png?raw=true)
+> A **TypeScript-based agent** that generates detailed technical scripts for music videos using OpenAI's API via LangChain. Integrates with **Nevermined's Payments API** for structured task handling and billing management.
 
 * * *
 
 Table of Contents
 -----------------
 
-1.  [Introduction](#introduction)
-2.  [Getting Started](#getting-started)
-    *   [Installation](#installation)
-    *   [Running the Agent](#running-the-agent)
-3.  [Project Structure](#project-structure)
-4.  [Integration with Nevermined Payments API](#integration-with-nevermined-payments-api)
-5.  [How to create your own agent](#how-to-create-your-own-agent)
-    *   [1. Subscribing to Task Requests](#1-subscribing-to-task-requests)
-    *   [2. Handling Task Lifecycle](#2-handling-task-lifecycle)
-    *   [3. Generating Film Scripts with LangChain](#3-generating-film-scripts-with-langchain)
-    *   [4. Validating Steps and Sending Logs](#4-validating-steps-and-sending-logs)
+1. [Introduction](#introduction)
+2. [Getting Started](#getting-started)
+    * [Installation](#installation)
+    * [Running the Agent](#running-the-agent)
+3. [Project Structure](#project-structure)
+4. [Integration with Nevermined Payments API](#integration-with-nevermined-payments-api)
+5. [Key Features](#key-features)
+6. [License](#license)
 
 * * *
 
 Introduction
 ------------
 
-The **Script Generator Agent** is a powerful application designed to generate highly detailed film or music video scripts. It leverages the **LangChain library** and **OpenAI API** to create scripts, including character descriptions, settings, and mood.
+The **Music Video Technical Script Generator** is a specialized application designed to create production-ready music video scripts with precise technical specifications. It leverages **LangChain** and **OpenAI API** to generate:
 
-This agent is integrated with **Nevermined's Payments API**, which provides:
+- Scene-by-scene breakdowns with exact timings
+- Camera shot types and movements (dolly, crane, Steadicam)
+- Lighting setups and color palettes
+- Equipment recommendations (lenses, stabilizers)
+- Visual references and transition types
 
-*   **Task lifecycle management**: Efficiently handle task creation, updates, and completion.
-*   **Billing integration**: Utilize subscription plans (DIDs) to manage balance and execute tasks.
-*   **Event subscription**: React to events like task updates in real-time.
+Integrated with **Nevermined's Payments API**, the agent provides:
 
-The agent receives input ideas as tasks, processes them into fully detailed scripts, and then updates the Nevermined task system with the results.
+- **Task lifecycle management**: Handle script generation requests efficiently
+- **Event-driven architecture**: React to task updates in real-time
+- **Seamless billing integration**: Manage payments through Nevermined ecosystem
 
-One of the standout features of this integration is the **absence of server-side complexity**:
-- **No custom server setup**: The Nevermined platform handles all API calls and client requests.
-- **Event-driven architecture**: The agent listens for task updates and processes them automatically.
-- **Seamless integration**: Tasks and billing are managed via the Payments API.
+The agent processes input ideas into complete technical scripts including:
 
-By subscribing to events with the `subscribe` method, the agent is notified of task requests, processes them through a callback, and sends updates back to the platform.
+- Shot compositions with duration markers
+- Character actions synchronized to music
+- Post-production effects planning
+- Cinematic style references
 
 * * *
 
@@ -74,54 +52,45 @@ Getting Started
 
 ### Installation
 
-1.  **Clone the repository**:
-    
+1. **Clone the repository**:
     ```bash
-    git clone https://github.com/nevermined-io/movie-script-generator-agent.git
-    cd script-generator-agent
+    git clone https://github.com/nevermined-io/music-video-script-generator-agent.git
+    cd music-video-script-generator-agent
     ```
-    
-2.  **Install dependencies**:
-    
+
+2. **Install dependencies**:
     ```bash
     npm install
     ```
-    
-3.  **Configure environment variables**:
-    
-    *   Copy the `.env.example` file to `.env`:
-        
+
+3. **Configure environment variables**:
+    - Copy `.env.example` to `.env`:
         ```bash
         cp .env.example .env
         ```
-        
-    *   Populate the `.env` file with the following details:
-        
+    - Populate `.env`:
         ```bash
         NVM_API_KEY=YOUR_NVM_API_KEY
         OPENAI_API_KEY=YOUR_OPENAI_API_KEY
         NVM_ENVIRONMENT=testing # or staging/production
         AGENT_DID=YOUR_AGENT_DID
         ```
-        
-4.  **Build the project**:
-    
+
+4. **Build the project**:
     ```bash
     npm run build
     ```
-    
 
 * * *
 
 ### Running the Agent
 
-Run the agent with the following command:
-
+Start the agent:
 ```bash
 npm start
 ```
 
-The agent will subscribe to the Nevermined task system and begin listening for task updates.
+The agent will connect to Nevermined's task system and await music video script generation requests.
 
 * * *
 
@@ -129,28 +98,25 @@ Project Structure
 -----------------
 
 ```plaintext
-script-generator-agent/
+music-video-script-generator-agent/
 ├── src/
-│   ├── main.ts                       # Main entry point for the agent
-│   ├── scriptGenerator.ts            # Script generation logic using LangChain
-│   ├── scriptCharacterExtractor.ts   # CharacterExtraction logic using LangChain
+│   ├── main.ts                       # Agent entry point
+│   ├── scriptGenerator.ts            # Core script generation logic
+│   ├── sceneTechnicalExtractor.ts    # Technical scene breakdowns
 ├── config/
-│   ├── env.ts                        # Environment import file
+│   ├── env.ts                        # Environment configuration
 ├── logger/
-│   ├── logger.ts                     # Logging file
-├── steps/
-│   ├── stepHandler.ts                # File in charge of handling task steps
-├── .env.example                      # Example environment variables file
-├── package.json                      # Project dependencies and scripts
-├── tsconfig.json                     # TypeScript configuration
+│   ├── logger.ts                     # Logging system
+├── .env.example                      # Environment template
+├── package.json                      # Dependencies
+├── tsconfig.json                     # TypeScript config
 ```
 
 ### Key Components:
 
 1.  **`main.ts`**: Handles task lifecycle, from receiving steps to sending back results.
-2.  **`scriptGenerator.ts`**: Implements the logic for generating scripts using LangChain and OpenAI.
-2.  **`scriptCharacterGenerator.ts`**: Implements the logic for generating character descriptions using LangChain and OpenAI.
-4.  **`.env`**: Stores sensitive configuration details like API keys and environment.
+2.  **`scriptGenerator.ts`**:  Implements music video script generation pipeline
+2.  **`sceneTechnicalExtractor.ts`**: Handles technical scene breakdowns and production prompts
 
 * * *
 
@@ -269,12 +235,14 @@ import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
 const prompt = ChatPromptTemplate.fromTemplate(`
-  Based on the following idea, generate a short film script including characters, their visual descriptions, and the setting:
+ **Role**: You're a professional music video director with expertise in storyboards and technical planning.  
+**Task**: Create a detailed technical script for a **3-minute maximum** music video based on the provided idea. Use **screenplay format without markdown**.  
+[...]
   Idea: {idea}
 `);
 
 const llm = new ChatOpenAI({
-  model: "gpt-3.5-turbo",
+  model: "gpt-4o-mini",
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
@@ -287,7 +255,7 @@ export class ScriptGenerator {
 ```
 
 #### Key Features:
-- **Custom Prompt**: Guides OpenAI to generate detailed scripts, including characters and settings.
+- **Custom Prompt**: Guides OpenAI to generate detailed scripts, including scenes, characters and settings.
 - **LangChain Integration**: Utilizes LangChain for structured prompt handling and output parsing.
 
 * * *
@@ -322,7 +290,7 @@ License
 -------
 
 ```
-Copyright 2024 Nevermined AG
+Copyright 2025 Nevermined AG
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

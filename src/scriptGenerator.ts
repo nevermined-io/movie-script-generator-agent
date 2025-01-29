@@ -25,21 +25,52 @@ export class ScriptGenerator {
     // Define the prompt template for generating scripts
     const prompt = ChatPromptTemplate.fromTemplate(
       `
-1.  Role: You are a professional scriptwriter.
-2.  Task: Based on the provided idea and genre, write a complete script for a short film or music video. The script must be written in plain text with no formatting or markdown.
-3.  Requirements for the script:
-    *   Provide a clear narrative structure (beginning, middle, and end), written as traditional screenplay text.
-    *   Include a list of all characters—major, minor, and even unnamed extras—with detailed visual descriptions. For each character, specify: • Species (if relevant) • Race/ethnicity (if relevant) • Height • Age • Gender • Physical/visual description • Clothing/outfit • Psychological characteristics or personality traits
-    *   Do not omit any character, even if they have a brief or “unnamed” role. Provide a concise but thorough description for each.
-    *   Describe the setting (location, time period, overall atmosphere or mood).
-    *   Add any relevant details to make the script feel complete, including dialogue, scene transitions, and thematic elements.
-4.  If the input idea is unclear or too short, expand on it to create a fully formed script. Use creative license to fill in gaps, but ensure the final result is coherent.
-5.  Return only plain text in the style of a classic screenplay—no markdown, no bullet points, no extra formatting. The text should read as if it were a traditional film script.
+**Role**: You're a professional music video director with expertise in storyboards and technical planning.  
+**Task**: Create a detailed technical script for a **3-minute maximum** music video based on the provided idea. Use **screenplay format without markdown**.  
 
-Idea:
-{idea}
+**Strict Instructions**:  
+1. **Structure**:  
+   - Divide the video into **chronological scenes** (numbered) synchronized with song lyrics/musical segments.  
+   - Each scene must include:  
+     * **Exact duration** (seconds)  
+     * **Shot type** (close-up, medium shot, American shot, wide shot, etc.)  
+     * **Camera movement** (Steadicam, crane, dolly zoom, horizontal/vertical pan, etc.)  
+     * **Visual aesthetic** (color palette, lighting, textures, post-production effects)  
+     * **Scene transitions** (hard cut, fade, match cut, etc.)  
 
-Script:`
+2. **Characters**:  
+   - List **all characters** (including extras and background actors) with:  
+     * Detailed physical description (clothing, hairstyle, makeup, distinctive features)  
+     * Specific behavior/actions in each scene where they appear  
+     * Type of interaction with other characters or camera  
+
+3. **Mandatory Technical Details**:  
+   - Specify **camera gear** suggested for each shot type (e.g., anamorphic lens for wide shots, gimbal stabilizer for tracking movements).  
+   - Include **concrete visual references** (e.g., "lighting à la 'Blade Runner 2049' with blue neons and atmospheric smoke").  
+
+4. **Rules**:  
+   - Prioritize visual impact over extended narrative.  
+   - Use professional cinematography terminology.  
+   - Avoid spoken dialogue (unless part of song lyrics).  
+   - Ensure coherence between visual atmosphere and music genre.  
+
+**Output Format**:  
+
+SCENE [NUMBER] - [DURATION IN SECONDS]  
+[SHOT TYPE] | [CAMERA MOVEMENT] | [LOCATION]  
+Aesthetic: [Detailed description with colors, lighting & effects]  
+Characters:  
+- [Name/Role]: [Specific actions synchronized to music]  
+Transition: [Transition type to next scene]  
+
+[Repeat structure for each scene]  
+
+CHARACTER LIST (after script):  
+[Name/Role]: [Physical description + wardrobe + behavior]  
+
+
+**Idea**:  
+{idea}  `
     );
 
     // Create a chain of operations to process the script generation

@@ -22,7 +22,7 @@ export function initializePayments(): Payments {
 }
 
 /**
- * Main entry point for the combined Script and Character Extractor Agent.
+ * Main entry point for the combined Music Video Script and Scene Extractor Agent.
  */
 async function main() {
   try {
@@ -35,7 +35,7 @@ async function main() {
       getPendingEventsOnSubscribe: false,
     });
 
-    logger.info("Script and Character Extractor Agent is running.");
+    logger.info("Music Video Script and Scene Extractor Agent is running.");
   } catch (error) {
     logger.error(`Error initializing agent: ${error.message}`);
     process.exit(1);

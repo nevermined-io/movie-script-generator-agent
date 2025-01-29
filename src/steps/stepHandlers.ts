@@ -4,14 +4,14 @@ import {
   generateStepId,
 } from "@nevermined-io/payments";
 import { logMessage, logger } from "../logger/logger";
-import { ScriptCharacterExtractor } from "../scriptCharacterExtractor";
+import { SceneTechnicalExtractor } from "../sceneTechnicalExtractor";
 
 /**
  * Processes incoming steps based on their type.
- * Handles the "init" step by creating the steps for "generateScript" and "extractCharacters".
+ * Handles the "init" step by creating the steps for "generateScript" and "extractScenes".
  */
 export function processSteps(payments: Payments) {
-  const extractor = new ScriptCharacterExtractor(process.env.OPENAI_API_KEY!);
+  const extractor = new SceneTechnicalExtractor(process.env.OPENAI_API_KEY!);
 
   return async (data: any) => {
     const eventData = JSON.parse(data);
@@ -30,11 +30,14 @@ export function processSteps(payments: Payments) {
       case "generateScript":
         await handleScriptGeneration(step, payments, extractor);
         break;
-      case "extractCharacters":
-        await handleCharacterExtraction(step, payments, extractor);
+      case "extractScenes":
+        await handleScenesExtraction(step, payments, extractor);
         break;
-      case "transformCharacters":
-        await handleCharacterTransformation(step, payments, extractor);
+      case "extractCharacters":
+        await handleCharactersExtraction(step, payments, extractor);
+        break;
+      case "transformScenes":
+        await handleScenesTransformation(step, payments, extractor);
         break;
       default:
         logger.warn(`Unrecognized step name: ${step.name}. Skipping...`);
@@ -45,10 +48,11 @@ export function processSteps(payments: Payments) {
 /**
  * Handles the "init" step by defining the workflow steps:
  * 1. "generateScript"
- * 2. "extractCharacters"
+ * 2. "extractScenes"
  */
 async function handleInitStep(step: any, payments: Payments) {
   const scriptStepId = generateStepId();
+  const scenestepId = generateStepId();
   const characterStepId = generateStepId();
   const transformStepId = generateStepId();
 
@@ -61,17 +65,24 @@ async function handleInitStep(step: any, payments: Payments) {
       is_last: false,
     },
     {
+      step_id: scenestepId,
+      task_id: step.task_id,
+      predecessor: scriptStepId, // "extractScenes" follows "generateScript"
+      name: "extractScenes",
+      is_last: false,
+    },
+    {
       step_id: characterStepId,
       task_id: step.task_id,
-      predecessor: scriptStepId, // "extractCharacters" follows "generateScript"
+      predecessor: scenestepId, // "extractCharacters" follows "extractScenes"
       name: "extractCharacters",
       is_last: false,
     },
     {
       step_id: transformStepId,
       task_id: step.task_id,
-      predecessor: characterStepId, // "extractCharacters" follows "generateScript"
-      name: "transformCharacters",
+      predecessor: characterStepId, // "transformScenes" follows "extractCharacters"
+      name: "transformScenes",
       is_last: true,
     },
   ];
@@ -99,12 +110,12 @@ async function handleInitStep(step: any, payments: Payments) {
 }
 
 /**
- * Handles the "generateScript" step, using the `ScriptCharacterExtractor` to generate a script.
+ * Handles the "generateScript" step, using the `SceneTechnicalExtractor` to generate a script.
  */
 async function handleScriptGeneration(
   step: any,
   payments: Payments,
-  extractor: ScriptCharacterExtractor
+  extractor: SceneTechnicalExtractor
 ) {
   try {
     const script = await extractor.generateScript(step.input_query);
@@ -113,7 +124,8 @@ async function handleScriptGeneration(
     await payments.query.updateStep(step.did, {
       ...step,
       step_status: AgentExecutionStatus.Completed,
-      output: script,
+      output: "Script generation completed.",
+      output_artifacts: [script],
     });
 
     logMessage(payments, {
@@ -132,72 +144,109 @@ async function handleScriptGeneration(
 }
 
 /**
- * Handles the "extractCharacters" step, extracting characters from the generated script.
+ * Handles the "extractScenes" step, extracting scenes from the generated script.
  */
-async function handleCharacterExtraction(
+async function handleScenesExtraction(
   step: any,
   payments: Payments,
-  extractor: ScriptCharacterExtractor
+  extractor: SceneTechnicalExtractor
 ) {
   try {
-    const characters = await extractor.extractCharacters(step.input_query);
+    const scenes = await extractor.extractScenes(step.input_query);
+    const script = JSON.parse(step.input_artifacts);
 
-    logger.info(`Extracted characters: ${JSON.stringify(characters)}`);
+    logger.info(`Extracted scenes: ${JSON.stringify(scenes)}`);
 
     await payments.query.updateStep(step.did, {
       ...step,
       step_status: AgentExecutionStatus.Completed,
-      output: step.input_query,
-      output_artifacts: [characters],
+      output: "Scenes extraction completed.",
+      output_artifacts: [script, scenes],
     });
 
     logMessage(payments, {
       task_id: step.task_id,
       level: "info",
-      message: `Character extraction completed successfully.`,
+      message: `Scenes extraction completed successfully.`,
     });
   } catch (error) {
-    logger.error(`Error during character extraction: ${error.message}`);
+    logger.error(`Error during scenes extraction: ${error.message}`);
     await payments.query.updateStep(step.did, {
       ...step,
       step_status: AgentExecutionStatus.Failed,
-      output: "Failed to extract characters.",
+      output: "Failed to extract scenes.",
     });
 
     logMessage(payments, {
       task_id: step.task_id,
       level: "info",
-      message: `Character extraction completed successfully.`,
+      message: `Scenes extraction completed successfully.`,
       task_status: AgentExecutionStatus.Failed,
     });
   }
 }
 
 /**
- * Handles the "transformCharacters" step, transforming the extracted characters.
+ * Handles the "extractCharacters" step, extracting characters from the generated script.
  */
-async function handleCharacterTransformation(
+async function handleCharactersExtraction(
   step: any,
   payments: Payments,
-  extractor: ScriptCharacterExtractor
+  extractor: SceneTechnicalExtractor
 ) {
   try {
-    const transformedCharacters = await extractor.transformCharacters(
-      step.input_artifacts,
-      step.input_query
+    const characters = await extractor.extractCharacters(step.input_query);
+    const [script, scenes] = JSON.parse(step.input_artifacts);
+
+    logger.info(`Extracted characters: ${JSON.stringify(characters)}`);
+
+    await payments.query.updateStep(step.did, {
+      ...step,
+      step_status: AgentExecutionStatus.Completed,
+      output: "Characters extraction completed.",
+      output_artifacts: [script, scenes, characters],
+    });
+
+    logMessage(payments, {
+      task_id: step.task_id,
+      level: "info",
+      message: `Characters extraction completed successfully.`,
+    });
+  } catch (error) {
+    logger.error(`Error during characters extraction: ${error.message}`);
+    await payments.query.updateStep(step.did, {
+      ...step,
+      step_status: AgentExecutionStatus.Failed,
+      output: "Failed to extract characters.",
+    });
+  }
+}
+
+/**
+ * Handles the "transformScenes" step, transforming the extracted scenes.
+ */
+async function handleScenesTransformation(
+  step: any,
+  payments: Payments,
+  extractor: SceneTechnicalExtractor
+) {
+  try {
+    const [script, scenes, characters] = JSON.parse(step.input_artifacts);
+    const transformedScenes = await extractor.transformScenes(
+      scenes,
+      characters,
+      script
     );
 
     try {
-      JSON.stringify(transformedCharacters);
+      JSON.stringify(transformedScenes);
     } catch (error) {
-      logger.info(transformedCharacters);
-      logger.info(`Error transforming characters: ${error.message}`);
-      throw new Error("Failed to transform characters.");
+      logger.info(transformedScenes);
+      logger.info(`Error transforming scenes: ${error.message}`);
+      throw new Error("Failed to transform scenes.");
     }
 
-    logger.info(
-      `Transformed characters: ${JSON.stringify(transformedCharacters)}`
-    );
+    logger.info(`Transformed scenes: ${JSON.stringify(transformedScenes)}`);
 
     await payments.query.updateStep(step.did, {
       ...step,
@@ -205,8 +254,8 @@ async function handleCharacterTransformation(
       output: step.input_query,
       output_artifacts: [
         JSON.stringify({
-          characters: JSON.parse(step.input_artifacts),
-          prompts: transformedCharacters,
+          scenes: JSON.parse(step.input_artifacts),
+          prompts: transformedScenes,
         }),
       ],
     });
@@ -214,15 +263,15 @@ async function handleCharacterTransformation(
     logMessage(payments, {
       task_id: step.task_id,
       level: "info",
-      message: `Character transformation completed successfully.`,
+      message: `Scenes transformation completed successfully.`,
       task_status: AgentExecutionStatus.Completed,
     });
   } catch (error) {
-    logger.error(`Error during character transformation: ${error.message}`);
+    logger.error(`Error during scenes transformation: ${error.message}`);
     await payments.query.updateStep(step.did, {
       ...step,
       step_status: AgentExecutionStatus.Failed,
-      output: "Failed to transform characters.",
+      output: "Failed to transform scenes.",
     });
   }
 }
