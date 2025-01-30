@@ -118,7 +118,8 @@ async function handleScriptGeneration(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const script = await extractor.generateScript(step.input_query);
+    const [lyrics] = JSON.parse(step.input_artifacts);
+    const script = await extractor.generateScript(step.input_query, lyrics);
 
     logger.info(`Generated script: ${script}`);
     await payments.query.updateStep(step.did, {

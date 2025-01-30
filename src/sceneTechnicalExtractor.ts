@@ -10,7 +10,10 @@ import {
  * Class combining script generation and scenes extraction.
  */
 export class SceneTechnicalExtractor {
-  private scriptChain: RunnableSequence<{ idea: string }, string>;
+  private scriptChain: RunnableSequence<
+    { idea: string; lyrics: string },
+    string
+  >;
   private sceneChain: RunnableSequence<
     { script: string },
     Record<string, any>[]
@@ -46,6 +49,7 @@ export class SceneTechnicalExtractor {
       TRANSITION: [type]
       
       Idea: {idea}
+      Song lyrics: {lyrics}
       Script:
       `),
       llm,
@@ -167,8 +171,8 @@ Transform scene technical details into self-contained video production prompts. 
     ]);
   }
 
-  async generateScript(idea: string): Promise<string> {
-    return await this.scriptChain.invoke({ idea });
+  async generateScript(idea: string, lyrics: string): Promise<string> {
+    return await this.scriptChain.invoke({ idea, lyrics });
   }
 
   async extractScenes(script: string): Promise<object[]> {

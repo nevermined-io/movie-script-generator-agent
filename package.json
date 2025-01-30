@@ -1,16 +1,14 @@
 {
   "name": "script-generator-agent",
   "version": "1.0.0",
-  "description": "",
   "main": "dist/main.js",
+  "license": "MIT",
+  "author": "Charly López",
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
     "dev": "nodemon --watch src --exec ts-node src/main.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@langchain/core": "^0.3.19",
     "@langchain/openai": "^0.3.14",
