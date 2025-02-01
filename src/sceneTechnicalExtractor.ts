@@ -221,41 +221,47 @@ CHARACTER LIST (after script):
 
     this.technicalTransformationChain = RunnableSequence.from([
       ChatPromptTemplate.fromTemplate(`
-Transform scene technical details into self-contained video production prompts. For each character reference, replace names with full physical descriptions using this format:
-      "[Gender] [Age] [Height] [Species] with [Physical Features], wearing [Attire]".
-      
-      Example transformation:
-      Before: "Larry gestures wildly"
-      After: "A male humanoid AI in late 20s appearance, 6'1" with glowing blue circuit patterns under translucent synthetic skin, wearing a distressed leather jacket, gestures wildly"
-      
-      Each prompt must include:
-      1. Shot composition details (framing, movement)
-      2. Camera specifications (lens, stabilizer)
-      3. Lighting setup (type, placement, color)
-      4. Color grading notes
-      5. Special effects requirements
-      6. Transition execution instructions
-      7. Character descriptions and actions
-      
-      Character Requirements:
-      1. Always use character descriptors instead of names
-      2. Include key physical features from CHARACTER_DATA
-      3. Maintain cinematic terminology from SCENE_DATA
-      4. Merge scene and character details seamlessly
-            
-      CHARACTER_DATA: {characters}
-      Scene Data: {scenes}
-      Script Context: {script}
-
-      Example output format:
-      [
-        "Cinematic wide shot using 24mm lens on tripod. Dimly-lit cluttered room with warm, muted earth tones. Male humanoid AI (late 20s appearance, 6'1\") with glowing blue circuit patterns under translucent synthetic skin, wearing a faded graphic tee depicting old film reels, demonstrates frustration while pacing. Color grading with warm earth tones. Transition: Fade to black with soft hum.",
-        "Close-up over-the-shoulder shot using 50mm lens. Androgynous digital entity (apparent age 25-30, 5'11\") with constantly shifting facial features rendered in holographic pixels, wearing fragmented light projections resembling a business suit, rejects script pitches. Cool blue tone grading. Transition: Glitch effect to next scene.",
-        ...
-      ]
-      
-      Return JSON array of strings. No explanations.
-      `),
+        Transform the technical details of the scenes into production prompts for both image and video. For each scene, generate an object with two attributes:
+        - **"imagePrompt"**: A detailed prompt for generating a static image that captures the composition, ambiance, lighting, color palette, and character layout.
+        - **"videoPrompt"**: A detailed prompt that describes the camera movement, transitions, special effects, and the movement or actions of the characters needed to animate the image into video.
+        
+        **Instructions**:
+        1. For each character reference, replace names with a full physical description using the following format:
+           \`"[Gender] [Age] [Height] [Species] with [Physical Features], wearing [Attire]"\`.
+        2. Include scene details such as:
+           - Shot composition (framing, focus, movement)
+           - Camera specifications (lens type, stabilizer, etc.)
+           - Lighting setup (type, position, color)
+           - Color grading notes
+        3. The **imagePrompt** should focus on the static visual aesthetics (composition, colors, and details), while the **videoPrompt** should emphasize dynamic elements such as:
+           - Camera movement and transitions
+           - Special effects to animate the scene
+           - The movement, actions, or gestures of the characters within the scene
+        4. Integrate the scene details and the character information coherently.
+        5. Use precise, professional cinematic terminology.
+        6. Utilize the following data:
+           - **CHARACTER_DATA**: {characters}
+           - **Scene Data**: {scenes}
+           - **Script Context**: {script}
+        
+        **Example output format**:
+        [
+          {
+            "imagePrompt": "Cinematic wide shot using a 24mm lens on a tripod. A dark, cluttered room with warm, muted earth tones. A male android in his 20s with glowing blue circuit patterns beneath translucent synthetic skin, wearing a worn leather jacket, centered in the frame.",
+            "videoPrompt": "Smooth dolly movement from left to right with a slow pan and fade transitions. The character performs subtle gestures that sync with the scene's rhythm, while digital effects and soft lighting transitions enhance the cinematic atmosphere."
+          },
+          {
+            "imagePrompt": "Close-up over-the-shoulder shot using a 50mm lens. An androgynous digital entity (aged between 25-30) with ever-changing holographic facial features, wearing fragmented luminous projections resembling a business suit, captured with high contrast and sharp detail.",
+            "videoPrompt": "Subtle zoom-in combined with a glitch transition. Camera movement is complemented by the character's dynamic actions, such as shifting poses and expressive gestures, with synchronized digital distortions and soft fades to create dramatic tension."
+          },
+          {
+            "imagePrompt": "Medium shot using an 85mm lens, capturing a dynamic urban street scene at dusk with neon lights reflecting off wet pavement. A female cyborg in her early 30s, with silver mechanical limbs and vibrant red hair, wearing a sleek futuristic jacket, stands poised in the frame.",
+            "videoPrompt": "Tracking shot with a steady cam as the camera follows the character walking briskly along the street. The character glances over her shoulder and raises her right arm to shield her eyes from a sudden burst of light, synchronized with rapid cuts and energetic digital overlays."
+          }
+        ]
+        
+        Return only a valid JSON array of objects using double quotes. Do not add any additional explanations.
+          `),
       llm,
       extractJsonRunnable,
       new JsonOutputParser(),
