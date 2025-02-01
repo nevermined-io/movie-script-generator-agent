@@ -6,7 +6,6 @@ import {
   JsonOutputParser,
   StringOutputParser,
 } from "@langchain/core/output_parsers";
-import { logger } from "./logger/logger";
 
 /**
  * A custom Runnable to extract pure JSON from an LLM response (AIMessage), ignoring
@@ -23,8 +22,6 @@ export const extractJsonRunnable = new RunnableLambda<AIMessage, string>({
     if (!jsonMatch) {
       throw new Error("No JSON found in the LLM response.");
     }
-    logger.info(`Content string: ${contentString}`);
-    logger.info(`Extracted JSON: ${jsonMatch[0]}`);
     return jsonMatch[0]; // The substring from the first '{' to the last '}'
   },
 });
