@@ -106,6 +106,7 @@ async function handleInitStep(step: any, payments: Payments) {
     ...step,
     step_status: AgentExecutionStatus.Completed,
     output: step.input_query,
+    output_artifacts: [JSON.parse(step.input_artifacts)],
   });
 }
 
@@ -117,23 +118,17 @@ async function handleScriptGeneration(
   payments: Payments,
   extractor: SceneTechnicalExtractor
 ) {
+  let artifacts: any;
   try {
-    const [lyrics] = JSON.parse(step.input_artifacts);
-    const script = await extractor.generateScript(step.input_query, lyrics);
-
-    logger.info(`Generated script: ${script}`);
-    await payments.query.updateStep(step.did, {
-      ...step,
-      step_status: AgentExecutionStatus.Completed,
-      output: "Script generation completed.",
-      output_artifacts: [script],
-    });
-
-    logMessage(payments, {
-      task_id: step.task_id,
-      level: "info",
-      message: `Script generation completed.`,
-    });
+    artifacts = JSON.parse(step.input_artifacts || "[]");
+    if (
+      !artifacts[0].title ||
+      !artifacts[0].tags ||
+      !artifacts[0].lyrics ||
+      !artifacts[0].idea
+    ) {
+      throw new Error("Missing required song metadata");
+    }
   } catch (error) {
     logger.error(`Error during script generation: ${error.message}`);
     await payments.query.updateStep(step.did, {
@@ -141,7 +136,23 @@ async function handleScriptGeneration(
       step_status: AgentExecutionStatus.Failed,
       output: "Failed to generate script.",
     });
+    return;
   }
+  const script = await extractor.generateScript(artifacts[0]);
+
+  logger.info(`Generated script: ${script}`);
+  await payments.query.updateStep(step.did, {
+    ...step,
+    step_status: AgentExecutionStatus.Completed,
+    output: "Script generation completed.",
+    output_artifacts: [script],
+  });
+
+  logMessage(payments, {
+    task_id: step.task_id,
+    level: "info",
+    message: `Script generation completed.`,
+  });
 }
 
 /**
@@ -239,26 +250,11 @@ async function handleScenesTransformation(
       script
     );
 
-    try {
-      JSON.stringify(transformedScenes);
-    } catch (error) {
-      logger.info(transformedScenes);
-      logger.info(`Error transforming scenes: ${error.message}`);
-      throw new Error("Failed to transform scenes.");
-    }
-
-    logger.info(`Transformed scenes: ${JSON.stringify(transformedScenes)}`);
-
     await payments.query.updateStep(step.did, {
       ...step,
       step_status: AgentExecutionStatus.Completed,
       output: step.input_query,
-      output_artifacts: [
-        JSON.stringify({
-          scenes: JSON.parse(step.input_artifacts),
-          prompts: transformedScenes,
-        }),
-      ],
+      output_artifacts: transformedScenes,
     });
 
     logMessage(payments, {

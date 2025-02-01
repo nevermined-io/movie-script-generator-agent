@@ -1,17 +1,71 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { RunnableSequence } from "@langchain/core/runnables";
+import { RunnableSequence, RunnableLambda } from "@langchain/core/runnables";
+import { AIMessage } from "@langchain/core/messages";
 import {
   JsonOutputParser,
   StringOutputParser,
 } from "@langchain/core/output_parsers";
+import { logger } from "./logger/logger";
+
+/**
+ * A custom Runnable to extract pure JSON from an LLM response (AIMessage), ignoring
+ * any text before or after the JSON block. This handles `content` that might be string or array.
+ */
+export const extractJsonRunnable = new RunnableLambda<AIMessage, string>({
+  /**
+   * The main function receiving `AIMessage`. We'll turn `content` (which may be array or string)
+   * into a single string, then run a regex to find the JSON block.
+   */
+  func: async (input: AIMessage): Promise<string> => {
+    const contentString = extractStringFromMessageContent(input.content);
+    const jsonMatch = contentString.match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
+    if (!jsonMatch) {
+      throw new Error("No JSON found in the LLM response.");
+    }
+    logger.info(`Content string: ${contentString}`);
+    logger.info(`Extracted JSON: ${jsonMatch[0]}`);
+    return jsonMatch[0]; // The substring from the first '{' to the last '}'
+  },
+});
+
+/**
+ * Safely extract a string from an AIMessage content, which might be a string or an array.
+ *
+ * @param inputContent - The `AIMessage.content`, which can be string or array.
+ * @returns A single string that merges array elements or returns the original string.
+ */
+function extractStringFromMessageContent(inputContent: string | any[]): string {
+  if (typeof inputContent === "string") {
+    return inputContent;
+  }
+
+  if (Array.isArray(inputContent)) {
+    // Combine each array element into one single text block.
+    // You can customize how you join them (spaces, line breaks, etc.).
+    return inputContent
+      .map((part) => {
+        if (typeof part === "string") {
+          return part;
+        } else if (part && typeof part === "object") {
+          // Example: convert objects to JSON strings or do something else
+          return JSON.stringify(part);
+        }
+        return String(part);
+      })
+      .join("\n");
+  }
+
+  // Fallback if it's some other unexpected type
+  return String(inputContent);
+}
 
 /**
  * Class combining script generation and scenes extraction.
  */
 export class SceneTechnicalExtractor {
   private scriptChain: RunnableSequence<
-    { idea: string; lyrics: string },
+    { idea: string; title: string; lyrics: string; tags: string },
     string
   >;
   private sceneChain: RunnableSequence<
@@ -32,25 +86,62 @@ export class SceneTechnicalExtractor {
 
     this.scriptChain = RunnableSequence.from([
       ChatPromptTemplate.fromTemplate(`
-      You are a professional music video director. Generate a technical script for a 3-minute music video based on this idea. Include:
-      1. Scene breakdown with exact timings (seconds)
-      2. Shot types (close-up, wide, etc.) and camera movements
-      3. Color palette and lighting for each scene
-      4. Equipment suggestions (lenses, stabilizers)
-      5. Visual references (cinematic comparisons)
-      6. Transition types between scenes
-      7. Character actions synchronized with music
-      
-      Follow this structure:
-      SCENE [N] - [DURATION]
-      SHOT TYPE | CAMERA MOVEMENT | LOCATION
-      AESTHETIC: [description]
-      CHARACTER ACTIONS: [specific movements]
-      TRANSITION: [type]
-      
-      Idea: {idea}
-      Song lyrics: {lyrics}
-      Script:
+**Role**: You're a professional music video director with expertise in storyboards and technical planning.  
+**Task**: Create a detailed technical script for a **3-minute maximum** music video based on the provided idea. Use **screenplay format without markdown**.  
+
+**Strict Instructions**:  
+1. **Structure**:  
+   - Divide the video into **chronological scenes** (numbered) synchronized with song lyrics/musical segments.  
+   - Each scene must include:  
+     * **Exact duration** (seconds)  
+     * **Shot type** (close-up, medium shot, American shot, wide shot, etc.)  
+     * **Camera movement** (Steadicam, crane, dolly zoom, horizontal/vertical pan, etc.)  
+     * **Visual aesthetic** (color palette, lighting, textures, post-production effects)  
+     * **Scene transitions** (hard cut, fade, match cut, etc.)  
+
+2. **Characters**:  
+   - List **all characters** (including extras and background actors) with:  
+     * Detailed physical description (clothing, hairstyle, makeup, distinctive features)  
+     * Specific behavior/actions in each scene where they appear  
+     * Type of interaction with other characters or camera  
+
+3. **Mandatory Technical Details**:  
+   - Specify **camera gear** suggested for each shot type (e.g., anamorphic lens for wide shots, gimbal stabilizer for tracking movements).  
+   - Include **concrete visual references** (e.g., "lighting à la 'Blade Runner 2049' with blue neons and atmospheric smoke").  
+
+4. **Rules**:  
+   - Prioritize visual impact over extended narrative.  
+   - Use professional cinematography terminology.  
+   - Avoid spoken dialogue (unless part of song lyrics).  
+   - Ensure coherence between visual atmosphere and music genre.  
+   - This is a music video, so characters playing instruments or singing are welcome.
+
+**Output Format**:  
+
+SCENE [NUMBER] - [DURATION IN SECONDS]  
+[SHOT TYPE] | [CAMERA MOVEMENT] | [LOCATION]  
+Aesthetic: [Detailed description with colors, lighting & effects]  
+Characters:  
+- [Name/Role]: [Specific actions synchronized to music]  
+Transition: [Transition type to next scene]  
+
+[Repeat structure for each scene]  
+
+CHARACTER LIST (after script):  
+[Name/Role]: [Physical description + wardrobe + behavior]  
+
+
+**Idea**:  
+{idea}  
+
+**Song lyrics**:
+{lyrics}
+
+**Song title**:
+{title}
+
+**Music style and mood**:
+{tags}
       `),
       llm,
       new StringOutputParser(),
@@ -92,6 +183,7 @@ export class SceneTechnicalExtractor {
       Return only valid JSON array. Use double quotes.
       `),
       llm,
+      extractJsonRunnable,
       new JsonOutputParser(),
     ]);
 
@@ -114,7 +206,7 @@ export class SceneTechnicalExtractor {
         "name": "Lead Singer",
         "age_range": "25-30",
         "perceived_gender": "Androgynous",
-        "height_build": "5'10\", lean muscular",
+        "height_build": "180cm, lean muscular",
         "distinctive_features": "Glowing circuit tattoos on neck, cybernetic left eye",
         "wardrobe_details": "Distressed Balmain leather jacket, Chrome Hearts belt",
         "movement_style": "Jagged, robotic gestures",
@@ -126,6 +218,7 @@ export class SceneTechnicalExtractor {
       Return JSON array. No markdown.
       `),
       llm,
+      extractJsonRunnable,
       new JsonOutputParser(),
     ]);
 
@@ -167,12 +260,18 @@ Transform scene technical details into self-contained video production prompts. 
       Return JSON array of strings. No explanations.
       `),
       llm,
+      extractJsonRunnable,
       new JsonOutputParser(),
     ]);
   }
 
-  async generateScript(idea: string, lyrics: string): Promise<string> {
-    return await this.scriptChain.invoke({ idea, lyrics });
+  async generateScript({ idea, title, lyrics, tags }): Promise<string> {
+    return await this.scriptChain.invoke({
+      idea,
+      title,
+      lyrics,
+      tags: tags.join(", "),
+    });
   }
 
   async extractScenes(script: string): Promise<object[]> {
