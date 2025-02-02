@@ -265,7 +265,7 @@ async function handleScenesTransformation(
       ...step,
       step_status: AgentExecutionStatus.Completed,
       output: step.input_query,
-      output_artifacts: transformedScenes,
+      output_artifacts: [{ transformedScenes, characters }],
     });
 
     logMessage(payments, {
