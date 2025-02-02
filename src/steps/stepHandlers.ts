@@ -145,7 +145,13 @@ async function handleScriptGeneration(
     ...step,
     step_status: AgentExecutionStatus.Completed,
     output: "Script generation completed.",
-    output_artifacts: [script],
+    output_artifacts: [
+      {
+        script,
+        lyrics: artifacts[0].lyrics,
+        tags: artifacts[0].tags,
+      },
+    ],
   });
 
   logMessage(payments, {
@@ -164,8 +170,8 @@ async function handleScenesExtraction(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const scenes = await extractor.extractScenes(step.input_query);
-    const script = JSON.parse(step.input_artifacts);
+    const [{ script, lyrics, tags }] = JSON.parse(step.input_artifacts);
+    const scenes = await extractor.extractScenes(script);
 
     logger.info(`Extracted scenes: ${JSON.stringify(scenes)}`);
 
@@ -173,7 +179,7 @@ async function handleScenesExtraction(
       ...step,
       step_status: AgentExecutionStatus.Completed,
       output: "Scenes extraction completed.",
-      output_artifacts: [script, scenes],
+      output_artifacts: [{ script, scenes, lyrics, tags }],
     });
 
     logMessage(payments, {
@@ -207,8 +213,12 @@ async function handleCharactersExtraction(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const characters = await extractor.extractCharacters(step.input_query);
-    const [script, scenes] = JSON.parse(step.input_artifacts);
+    const [{ script, scenes, lyrics, tags }] = JSON.parse(step.input_artifacts);
+    const characters = await extractor.extractCharacters(
+      step.input_query,
+      lyrics,
+      tags
+    );
 
     logger.info(`Extracted characters: ${JSON.stringify(characters)}`);
 
@@ -249,6 +259,7 @@ async function handleScenesTransformation(
       characters,
       script
     );
+    logger.info(`Transformed scenes: ${JSON.stringify(transformedScenes)}`);
 
     await payments.query.updateStep(step.did, {
       ...step,
