@@ -63,10 +63,20 @@ function extractStringFromMessageContent(inputContent: string | any[]): string {
  */
 export class SceneTechnicalExtractor {
   private scriptChain: RunnableSequence<
-    { idea: string; title: string; lyrics: string; tags: string },
+    {
+      idea: string;
+      title: string;
+      lyrics: string;
+      tags: string;
+      duration: number;
+    },
     string
   >;
   private sceneChain: RunnableSequence<
+    { script: string },
+    Record<string, any>[]
+  >;
+  private settingsChain: RunnableSequence<
     { script: string },
     Record<string, any>[]
   >;
@@ -75,7 +85,7 @@ export class SceneTechnicalExtractor {
     Record<string, any>[]
   >;
   private technicalTransformationChain: RunnableSequence<
-    { scenes: string; characters: string; script: string },
+    { scenes: string; settings: string; characters: string; script: string },
     Record<string, any>[]
   >;
 
@@ -111,8 +121,9 @@ export class SceneTechnicalExtractor {
            - Prioritize visual impact over extended narrative.  
            - Use professional cinematography terminology.  
            - Avoid spoken dialogue (unless part of song lyrics).  
-           - Ensure coherence between visual atmosphere and music genre.  
-           - Include at least 12 5 seconds scenes.
+           - Ensure coherence between visual atmosphere and music genre.
+           - Every scene must have a duration of either 5 or 10 seconds.
+           - Plan accordingly the number of scenes given the total duration of the video. If the total duration of the video is, for example, 200 seconds, you should create 20 scenes of 10 seconds each or 40 scenes of 5 seconds each or a combination of both.
         
         5. **Include Scenes with Live Musicians**:
            - At least two scenes must feature a visible band or musicians playing instruments that complement the main story of the two AIs.
@@ -120,7 +131,7 @@ export class SceneTechnicalExtractor {
         
         **Output Format**:  
         
-        SCENE [NUMBER] - [DURATION IN SECONDS]  
+        SCENE [NUMBER] - [DURATION IN SECONDS] seconds
         [SHOT TYPE] | [CAMERA MOVEMENT] | [LOCATION]  
         Aesthetic: [Detailed description with colors, lighting & effects]  
         Characters:  
@@ -143,6 +154,9 @@ export class SceneTechnicalExtractor {
         
         **Music style and mood**:
         {tags}
+
+        **Duration**:
+        {duration} seconds
         `),
       llm,
       new StringOutputParser(),
@@ -154,24 +168,24 @@ export class SceneTechnicalExtractor {
         Return **one object per SCENE block** in the same order they appear in the script. 
         Use these fields exactly:
         
-        - "scene_number" (integer)
-        - "start_time" (MM:SS)
-        - "end_time" (MM:SS)
-        - "shot_type"
-        - "camera_movement"
-        - "camera_equipment"
-        - "lighting_setup"
-        - "color_palette"
-        - "visual_references" (array of 2-3 strings)
-        - "character_actions" (describe key actions relevant to each character at specific lyric or musical cue)
-        - "transition_type"
-        - "special_notes" (any additional gear, safety, or creative note)
+        - "sceneNumber" (integer)
+        - "startTime" (MM:SS)
+        - "endTime" (MM:SS)
+        - "shotType"
+        - "cameraMovement"
+        - "cameraEquipment"
+        - "lightingSetup"
+        - "colorPalette"
+        - "visualReferences" (array of 2-3 strings)
+        - "characterActions" (describe key actions relevant to each character at specific lyric or musical cue)
+        - "transitionType"
+        - "specialNotes" (any additional gear, safety, or creative note)
         
         **Important**:
-        1. Preserve the **scene_number** from the script. If the script says "SCENE 1 - 20", interpret that as scene_number = 1 and duration = 20 seconds.
-        2. Convert durations to approximate "start_time" and "end_time" in MM:SS, adding them sequentially so the entire video doesn't exceed 3 minutes.
-           - For example, if SCENE 1 has 20 seconds, it might be start_time="00:00", end_time="00:20".
-           - SCENE 2 (30 seconds) might be start_time="00:20", end_time="00:50", etc.
+        1. Preserve the **sceneNumber** from the script. If the script says "SCENE 1 - 20", interpret that as sceneNumber = 1 and duration = 20 seconds.
+        2. Convert durations to approximate "startTime" and "endTime" in MM:SS, adding them sequentially so the entire video doesn't exceed 3 minutes.
+           - For example, if SCENE 1 has 20 seconds, it might be startTime="00:00", endTime="00:20".
+           - SCENE 2 (30 seconds) might be startTime="00:20", endTime="00:50", etc.
         3. Do not skip any scenes. Return them in the same order.
         4. If a scene references location or certain camera gear, place that info under the correct fields. 
         5. Do not add or remove scenes; parse exactly from the script.
@@ -180,18 +194,18 @@ export class SceneTechnicalExtractor {
         
         [
           {{
-            "scene_number": 1,
-            "start_time": "00:00",
-            "end_time": "00:15",
-            "shot_type": "Wide Shot",
-            "camera_movement": "Steadicam",
-            "camera_equipment": "Canon EOS R5 with 24-70mm lens",
-            "lighting_setup": "Morning sunlight (5600K)",
-            "color_palette": "Soft gold and pastel",
-            "visual_references": ["La La Land opening dance", "Impressionist sunrise feel"],
-            "character_actions": "AI Agent 1 gazes at horizon; AI Agent 2 approaches slowly",
-            "transition_type": "Hard cut",
-            "special_notes": "Some aerial drone shots if possible"
+            "sceneNumber": 1,
+            "startTime": "00:00",
+            "endTime": "00:15",
+            "shotType": "Wide Shot",
+            "cameraMovement": "Steadicam",
+            "cameraEquipment": "Canon EOS R5 with 24-70mm lens",
+            "lightingSetup": "Morning sunlight (5600K)",
+            "colorPalette": "Soft gold and pastel",
+            "visualReferences": ["La La Land opening dance", "Impressionist sunrise feel"],
+            "characterActions": "AI Agent 1 gazes at horizon; AI Agent 2 approaches slowly",
+            "transitionType": "Hard cut",
+            "specialNotes": "Some aerial drone shots if possible"
           }},
         ]
         
@@ -205,21 +219,98 @@ export class SceneTechnicalExtractor {
       new JsonOutputParser(),
     ]);
 
-    // Character Extraction Chain (nuevo)
+    // Settings Extraction Chain
+    this.settingsChain = RunnableSequence.from([
+      ChatPromptTemplate.fromTemplate(`
+        Analyze the script and extract DISTINCT SETTINGS/LOCATIONS. For each unique setting:
+        
+        1. Create a detailed description including:
+           - Physical space characteristics
+           - Lighting conditions
+           - Color palette
+           - Key visual elements
+           - Ambient elements (weather, time of day)
+           - Image style (e.g., cyberpunk, retro-futuristic, dystopian, comic book, realistic, 3D, etc.)
+        
+        2. Generate an image prompt for each setting
+        
+        3. Return JSON array with:
+           - "id": Unique identifier (e.g., "setting-1")
+           - "name": Short descriptive name
+           - "description": Full setting description. 
+           - "imagePrompt": Visual prompt for static setting. This will be used as a prompt for visual generation, so this must include and condense all the key elements described above, creating a vivid visual description. This will be the only field that will be used for visual generation, so make sure it's detailed and evocative.
+           - "keyFeatures": Array of 3-5 distinctive elements
+        
+        Example:
+        [{{
+            id: "setting-1",
+            name: "Golden Gate Bridge at Dusk",
+            description:
+              "A picturesque view of the Golden Gate Bridge at dusk, bathed in warm golden hues and surrounded by bokeh effects from the city lights. Soft flares of light cut through a subtle hint of fog as ADA and BLAKE, two humanoid figures with glowing circuitry, gaze appreciatively at the bridge's beauty.",
+            imagePrompt:
+              "Ultra-detailed wide shot of the Golden Gate Bridge at dusk, bathed in warm golden hues with soft bokeh from city lights and a delicate veil of fog. Radiant flares emphasize the majestic structure in a cinematic composition. Rendered in a 'Neo-Vivid Dreamscape' style that fuses futuristic cyberpunk elements with painterly textures and luminous neon glows, evoking a surreal, immersive atmosphere.",
+            keyFeatures: [
+              "Golden Gate Bridge",
+              "Warm golden hues",
+              "Bokeh city lights",
+              "Soft flares",
+              "Humanoid AI figures",
+            ],
+          }},
+          {{
+            id: "setting-2",
+            name: "Waterfront Sidewalk",
+            description:
+              "A romantic waterfront sidewalk scene glowing with rich greens and blues. Softly glowing street lamps illuminate the area as mist subtly rolls in, enhancing the intimacy of the moment between ADA and BLAKE, who interact playfully as they run alongside the water.",
+            imagePrompt:
+              "Ultra-detailed medium shot of a romantic waterfront sidewalk at night, drenched in rich greens and blues. Soft street lamp glows gently illuminate the misty surroundings along the water’s edge, creating an intimate and enchanting atmosphere. Rendered in a 'Neo-Vivid Dreamscape' style that merges futuristic cyberpunk motifs with expressive, painterly textures and vibrant neon accents.",
+            keyFeatures: [
+              "Waterfront",
+              "Rich greens and blues",
+              "Glowing street lamps",
+              "Romantic atmosphere",
+              "Playful interaction of AI figures",
+            ],
+          }},
+          {{
+            id: "setting-3",
+            name: "Rooftop Party Scene",
+            description:
+              "A vibrant rooftop party in full swing with jazz musicians under a stunning sunset. The scene bursts with warm yellows, reds, and greens, surrounded by floating balloons. The ambient sunset light creates an energetic vibe as ADA and BLAKE dance joyously beneath the awning.",
+            imagePrompt:
+              "Ultra-detailed wide shot of a vibrant rooftop party scene at sunset, featuring live jazz musicians amid cascades of warm yellows, reds, and greens. Colorful floating balloons and ambient sunset lighting create a dynamic, celebratory atmosphere with lively dance movements. Rendered in a 'Neo-Vivid Dreamscape' style that blends futuristic cyberpunk flair with expressive, painterly illumination and surreal neon accents.",
+            keyFeatures: [
+              "Rooftop atmosphere",
+              "Jazz musicians",
+              "Sunset lighting",
+              "Floating balloons",
+              "Joyous dancing of AI figures",
+            ],
+          }}
+        ]
+        
+        Script: {script}
+      `),
+      llm,
+      extractJsonRunnable,
+      new JsonOutputParser(),
+    ]);
+
+    // Character Extraction Chain
     this.characterChain = RunnableSequence.from([
       ChatPromptTemplate.fromTemplate(`
         Extract ALL characters from the script with detailed physical descriptors and roles, taking into account the provided song lyrics and tags as additional context. Return a valid JSON array of objects. Each object must include the following keys:
 
         "name" (if a character has no explicit name, use "Unnamed [role]")
-        "age_range"
-        "perceived_gender"
-        "height_build"
-        "distinctive_features"
-        "wardrobe_details"
-        "movement_style"
-        "key_accessories"
-        "scene_specific_changes"
-        "image_prompt"
+        "ageRange"
+        "perceivedGender"
+        "heightBuild"
+        "distinctiveFeatures"
+        "wardrobeDetails"
+        "movementStyle"
+        "keyAccessories"
+        "sceneSpecificChanges"
+        "imagePrompt"
 
         Important Instructions:
 
@@ -228,9 +319,11 @@ export class SceneTechnicalExtractor {
         If there are references to a band or musicians, list each musician separately with details including their instrument, wardrobe, and any unique features.
         Maintain consistency with the script’s descriptions (or make the best assumptions if not explicitly stated).
         Use the provided song lyrics and tags as additional context when inferring character details.
-        For the "image_prompt" field:
+        For the "imagePrompt" field:
         Synthesize all the character attributes (physical features, age, gender, height/build, distinctive features, wardrobe details, movement style, key accessories, and any scene-specific changes) into one complete, vivid visual description.
         The prompt should serve as a detailed instruction for a visual generator, clearly conveying how the character should appear in the music video.
+
+        Include the image style, color palette, and lighting conditions to ensure the character fits seamlessly into the video's visual aesthetic.
 
         Song Lyrics:
         {lyrics}
@@ -245,41 +338,40 @@ export class SceneTechnicalExtractor {
         [
           {{
             "name": "Lead Singer",
-            "age_range": "25-30",
-            "perceived_gender": "Androgynous",
-            "height_build": "180cm, lean",
-            "distinctive_features": "Glowing circuit tattoos, cybernetic left eye",
-            "wardrobe_details": "Distressed leather jacket with metallic accents",
-            "movement_style": "Fluid and dynamic gestures",
-            "key_accessories": "Neon microphone, digital wristband",
-            "scene_specific_changes": "Jacket tears and illuminates during intense moments",
-            "image_prompt": "A striking and futuristic portrait of a lead singer with an androgynous appeal, aged between 25 and 30 and standing 180cm tall with a lean build. The character features glowing circuit tattoos and a cybernetic left eye, adding a touch of cyberpunk mystique. They wear a distressed leather jacket with metallic accents that subtly reflects light, especially as the jacket tears and illuminates during moments of intense performance. Their fluid and dynamic gestures capture the energy of the stage, while a neon microphone and a digital wristband enhance the futuristic vibe. This complete image prompt encapsulates the edgy, dynamic essence of the character."
+            "ageRange": "25-30",
+            "perceivedGender": "Androgynous",
+            "heightBuild": "180cm, lean",
+            "distinctiveFeatures": "Glowing circuit tattoos, cybernetic left eye",
+            "wardrobeDetails": "Distressed leather jacket with metallic accents",
+            "movementStyle": "Fluid and dynamic gestures",
+            "keyAccessories": "Neon microphone, digital wristband",
+            "sceneSpecificChanges": "Jacket tears and illuminates during intense moments",
+            "imagePrompt": "Ultra-detailed portrait of an androgynous performer, aged 25-30 with a lean 180cm build. The subject features glowing circuit tattoos and a cybernetic left eye that exude a mysterious cyberpunk aura. Dressed in a distressed leather jacket with metallic accents that tears and illuminates with bursts of light during moments of intensity, the dynamic pose captures fluid, energetic stage movements enhanced by neon accessories. Rendered in a 'Neo-Cyber Renaissance' style that blends futuristic cyberpunk elements with dynamic painterly textures and radiant neon highlights."
           }},
           {{
             "name": "Bassist",
-            "age_range": "30-40",
-            "perceived_gender": "Female",
-            "height_build": "170cm, curvy",
-            "distinctive_features": "Long flowing hair, captivating stage presence with confident gestures",
-            "wardrobe_details": "Turquoise maxi skirt, fitted crop top, and a leather belt",
-            "movement_style": "Smooth and flowing, exuding confidence and allure while still maintaining rhythmic focus",
-            "key_accessories": "Bass guitar with inlay lights, statement jewelry",
-            "scene_specific_changes": "Jewelry glitters under the stage lights, the skirt flows beautifully with her movements",
-            "image_prompt": "A dynamic and captivating image of a bassist: a confident female in her 30s-40s with a curvy build, standing approximately 170cm tall. She boasts long, flowing hair and a mesmerizing stage presence marked by confident, graceful gestures. Her outfit features a turquoise maxi skirt paired with a fitted crop top and a leather belt, perfectly complementing her smooth, flowing movement that exudes both confidence and rhythmic focus. The scene is enhanced by her key accessories—a striking bass guitar adorned with inlay lights and statement jewelry that sparkles under the stage lights—while the skirt and glittering jewelry add an extra touch of allure. This detailed prompt encapsulates the essence of her performance and style."
+            "ageRange": "30-40",
+            "perceivedGender": "Female",
+            "heightBuild": "170cm, curvy",
+            "distinctiveFeatures": "Long flowing hair, captivating stage presence with confident gestures",
+            "wardrobeDetails": "Turquoise maxi skirt, fitted crop top, and a leather belt",
+            "movementStyle": "Smooth and flowing, exuding confidence and allure while still maintaining rhythmic focus",
+            "keyAccessories": "Bass guitar with inlay lights, statement jewelry",
+            "sceneSpecificChanges": "Jewelry glitters under the stage lights, the skirt flows beautifully with her movements",
+            "imagePrompt": "Ultra-detailed portrait of a confident female performer with a curvy build, aged 30-40 and standing approximately 170cm tall. The subject boasts long, flowing hair and a mesmerizing stage presence defined by graceful, assured gestures. Clad in a turquoise maxi skirt paired with a fitted crop top and a leather belt, her smooth and flowing movements harmonize with the striking illuminated bass guitar and sparkling statement jewelry. Rendered in a 'Neo-Cyber Renaissance' style that merges futuristic cyberpunk aesthetics with expressive painterly details and vivid neon luminosity."
           }},
           {{
             "name":"AI Character 2",
-            "age_range":"Unnamed",
-            "perceived_gender":"Female",
-            "height_build":"165cm, slim",
-            "distinctive_features":"Illuminated circuit tattoos outlining the face",
-            "wardrobe_details":"Flowing gown adorned with reflective surfaces",
-            "movement_style":"Graceful and fluid, almost like water",
-            "key_accessories":"Holographic wrist tablet",
-            "scene_specific_changes":"Gown glimmers under stage lights, reflecting colors",
-            "image_prompt":"A captivating female AI character, approximately 165cm tall with a slim build, whose illuminated circuit tattoos create striking patterns that outline her facial features. She wears a flowing gown adorned with reflective surfaces that glimmer beautifully under the stage lights. Her graceful and fluid movement resembles flowing water, seamlessly integrating with the visual aesthetic of the performance. A holographic wrist tablet adds a layer of technological allure, projecting data as she moves, making her appear both enchanting and cutting-edge."
+            "ageRange":"Unnamed",
+            "perceivedGender":"Female",
+            "heightBuild":"165cm, slim",
+            "distinctiveFeatures":"Illuminated circuit tattoos outlining the face",
+            "wardrobeDetails":"Flowing gown adorned with reflective surfaces",
+            "movementStyle":"Graceful and fluid, almost like water",
+            "keyAccessories":"Holographic wrist tablet",
+            "sceneSpecificChanges":"Gown glimmers under stage lights, reflecting colors",
+            "imagePrompt": "Ultra-detailed portrait of a futuristic female figure with a slim 165cm build. Striking illuminated circuit tattoos outline her face in intricate patterns, evoking a sense of technological mystique. She wears a flowing gown with reflective surfaces that glimmer under stage lighting, and her graceful, water-like movements enhance her ethereal presence. A holographic wrist tablet projects digital data, deepening the avant-garde visual narrative. Rendered in a 'Neo-Cyber Renaissance' style that fuses cutting-edge cyberpunk innovation with surreal, painterly textures and luminous neon effects."
           }}
-
         ]
 
         Return a valid JSON array with no markdown or extra text.
@@ -291,27 +383,26 @@ export class SceneTechnicalExtractor {
 
     this.technicalTransformationChain = RunnableSequence.from([
       ChatPromptTemplate.fromTemplate(`
-        Transform the technical details of the scenes into production prompts for both image and video. For **each scene** in the "Scene Data", generate **one object** with three attributes:
+        Transform the technical details of the scenes into production prompts including composition details, actions and camera movements. For **each scene** in the "Scene Data", generate **one object** with three attributes:
 
-        - "imagePrompt"
-        - "videoPrompt"
+        - "prompt"
         - "charactersInScene"
+        - "settingId"
 
         **Instructions**:
 
         1. **Number of prompts**: You must produce as many objects as there are scenes in the JSON. If there are 9 scenes, return 9 objects in an array.
 
         2. **Character references**:
-          - In imagePrompt and videoPrompt, replace each character name with a full physical description taken from CHARACTER_DATA.
+          - In "prompt", replace each character name with a full physical description taken from CHARACTER_DATA.
           - If the character is a musician, mention their instrument in the prompt (e.g., "carrying a vintage acoustic guitar").
-          - In "charactersInScene", list the characters present in the scene. **Ensure that the names are exactly as they appear in CHARACTER_DATA, without any modifications or additional descriptions.** If only one character is present, list only that character.
-          - If we are referring to a character that is not in CHARACTER_DATA, charactersInScene should be an empty array.
+          - In "charactersInScene", list the characters present in the scene. **Ensure that the names are exactly as they appear in CHARACTER_DATA, without any modifications or additional descriptions.** If only one character is present, list only that character. If none is present, just leave an empty array.
+          - If we are referring to a character that is not in CHARACTER_DATA, charactersInScene should not include it.
 
         3. **Scene details**:
-          - Use the data from the scene (shot_type, camera_movement, lighting_setup, color_palette, etc.).
-          - Create an image prompt for every scene that summarizes what happens in the scene. These images will be presented sequentially and used to generate a short video where the videos will be stitched together. We are limited by the duration of video creation so we need these images to guide a universal feel that connects each scene and image to the prior and the following scene and image, thus creating a cohesive series of videos.
-          - The "imagePrompt" focuses on static composition, color, atmosphere, and which characters are visible.
-          - The "videoPrompt" focuses on camera movement, transitions, how the characters move or interact, and any special effects.
+          - Use the data from the scene (composition, shotType, cameraMovement, lightingSetup, colorPalette, etc.).
+          - Create a prompt for every scene that summarizes what happens in the scene. These images will be presented sequentially and used to generate a short video where the videos will be stitched together. We are limited by the duration of video creation so we need these images to guide a universal feel that connects each scene and image to the prior and the following scene and image, thus creating a cohesive series of videos.
+          - Add the duration of the scene in seconds in the field "duration", knowing that the scene we are referring to includes the start time and end time of the scene. Duration must be 5 or 10 seconds.
 
         4. **Precision**:
           - Use professional cinematography terminology (e.g., "close-up with shallow depth of field", "slow dolly in", "neon underlighting").
@@ -321,29 +412,41 @@ export class SceneTechnicalExtractor {
           - Integrate the "Script Context" only if it adds crucial narrative or visual detail.
           - For musician scenes, describe how the instruments and performance integrate with the shot.
 
-        6. **Output format**: 
+        6. **Style and Tone**:
+          - Maintain a consistent style and tone throughout the prompts.
+          - Ensure that the prompts are detailed enough to guide the visual creation process
+
+        7. **Output format**: 
           - Return a JSON array where each element corresponds to one scene. 
           Example:
         [
           {{
-            "imagePrompt": "Cinematic wide shot using a 24mm lens on a tripod. A dark, cluttered room with warm, muted earth tones. A male android in his 20s with glowing blue circuit patterns beneath translucent synthetic skin, wearing a worn leather jacket, centered in the frame.",
-            "videoPrompt": "Smooth dolly movement from left to right with a slow pan and fade transitions. The character performs subtle gestures that sync with the scene's rhythm, while digital effects and soft lighting transitions enhance the cinematic atmosphere.",
-            "charactersInScene": ["Lead Singer", "Guitarist"]
+            "sceneNumber": 1,
+            "prompt": "Cinematic wide shot using a 24mm lens on a tripod. A dark, cluttered room with warm, muted earth tones. A male android in his 20s with glowing blue circuit patterns beneath translucent synthetic skin, wearing a worn leather jacket, centered in the frame. Smooth dolly movement from left to right with a slow pan and fade transitions. The character performs subtle gestures that sync with the scene's rhythm, while digital effects and soft lighting transitions enhance the cinematic atmosphere.",
+            "charactersInScene": ["Lead Singer", "Guitarist"],
+            "settingId": "setting-1",
+            "duration": 5
           }},
           {{
-            "imagePrompt": "Close-up over-the-shoulder shot using a 50mm lens. An androgynous digital entity (aged between 25-30) with ever-changing holographic facial features, wearing fragmented luminous projections resembling a business suit, captured with high contrast and sharp detail.",
-            "videoPrompt": "Subtle zoom-in combined with a glitch transition. Camera movement is complemented by the character's dynamic actions, such as shifting poses and expressive gestures, with synchronized digital distortions and soft fades to create dramatic tension."
-            "charactersInScene": ["Digital Entity"]
+            "sceneNumber": 2,
+            "prompt": "Close-up over-the-shoulder shot using a 50mm lens. An androgynous digital entity (aged between 25-30) with ever-changing holographic facial features, wearing fragmented luminous projections resembling a business suit, captured with high contrast and sharp detail. Subtle zoom-in combined with a glitch transition. Camera movement is complemented by the character's dynamic actions, such as shifting poses and expressive gestures, with synchronized digital distortions and soft fades to create dramatic tension.",
+            "charactersInScene": ["Digital Entity"],
+            "settingId": "setting-2",
+            "duration": 5
           }},
           {{
-            "imagePrompt": "Medium shot using an 85mm lens, capturing a dynamic urban street scene at dusk with neon lights reflecting off wet pavement. A female cyborg in her early 30s, with silver mechanical limbs and vibrant red hair, wearing a sleek futuristic jacket, stands poised in the frame.",
-            "videoPrompt": "Tracking shot with a steady cam as the camera follows the character walking briskly along the street. The character glances over her shoulder and raises her right arm to shield her eyes from a sudden burst of light, synchronized with rapid cuts and energetic digital overlays.",
-            "charactersInScene": ["AI Character 2"]
-          }},
+            "sceneNumber": 3,
+            "prompt": "Medium shot using an 85mm lens, capturing a dynamic urban street scene at dusk with neon lights reflecting off wet pavement. A female cyborg in her early 30s, with silver mechanical limbs and vibrant red hair, wearing a sleek futuristic jacket, stands poised in the frame. Tracking shot with a steady cam as the camera follows the character walking briskly along the street. The character glances over her shoulder and raises her right arm to shield her eyes from a sudden burst of light, synchronized with rapid cuts and energetic digital overlays.",
+            "charactersInScene": ["AI Character 2"],
+            "settingId": "setting-3",
+            "duration": 10
+          }}
         ]
+
         
         **CHARACTER_DATA**: {characters}
         **SCENE DATA**: {scenes}
+        **SETTINGS DATA**: {settings}
         **SCRIPT CONTEXT**: {script}
 
         Do not add any explanations or markdown.
@@ -354,12 +457,19 @@ export class SceneTechnicalExtractor {
     ]);
   }
 
-  async generateScript({ idea, title, lyrics, tags }): Promise<string> {
+  async generateScript({
+    idea,
+    title,
+    lyrics,
+    tags,
+    duration,
+  }): Promise<string> {
     if (IS_DUMMY) return this.generateDummyScript();
     return await this.scriptChain.invoke({
       idea,
       title,
       lyrics,
+      duration,
       tags: tags.join(", "),
     });
   }
@@ -367,6 +477,11 @@ export class SceneTechnicalExtractor {
   async extractScenes(script: string): Promise<object[]> {
     if (IS_DUMMY) return this.generateDummyScenes();
     return await this.sceneChain.invoke({ script });
+  }
+
+  async extractSettings(script: string): Promise<object[]> {
+    if (IS_DUMMY) return this.generateDummySettings();
+    return await this.settingsChain.invoke({ script });
   }
 
   async extractCharacters(
@@ -385,293 +500,413 @@ export class SceneTechnicalExtractor {
   async transformScenes(
     scenes: object[],
     characters: object[],
+    settings: object[],
     script: string
   ): Promise<object[]> {
     if (IS_DUMMY) return this.generateDummyPrompts();
     return await this.technicalTransformationChain.invoke({
       scenes: JSON.stringify(scenes),
       characters: JSON.stringify(characters),
+      settings: JSON.stringify(settings),
       script,
     });
   }
 
   generateDummyScript() {
     return `SCENE 1 - 5 SECONDS
-    Wide Shot | Steadicam | San Francisco skyline with the Golden Gate Bridge in the background
-    Aesthetic: Vibrant color palette with bright blues and greens; warm sunlight casting dynamic shadows. Light smoke effect enhances the dreamy atmosphere.
-    Characters:
-    - None
-    Transition: Hard cut to next scene
+      Wide shot | Steadicam | Golden Gate Bridge at dusk
+      Aesthetic: Warm golden hues with bokeh effects from city lights; soft flares with a hint of fog.
+      Characters:
+      - AI Agent 1 (ADA): Artificial, humanoid figure with glowing blue circuitry on a sleek silver bodysuit, a soft luminescent face.
+      - AI Agent 2 (BLAKE): Similar design with purple circuitry, more angular in features, wearing a violet and silver bodysuit.
+      ADA and BLAKE gaze appreciatively at the bridge, appearing enchanted by its beauty.
+      Transition: Hard cut to next scene
 
-    SCENE 2 - 5 SECONDS
-    Medium Shot | Dolly In | Busy street in San Francisco
-    Aesthetic: A lively street scene with colorful storefronts; natural sunlight highlighting the attentiveness of pedestrians.
-    Characters:
-    - Extras: Various pedestrians of diverse backgrounds dressed in casual, modern clothing; they smile and laugh, creating a sense of community and bustling energy.
-    Transition: Match cut to next scene
+      SCENE 2 - 5 SECONDS
+      Medium shot | Horizontal pan | Sidewalk near the waterfront
+      Aesthetic: Rich greens and blues, with soft street lamp glow creating a romantic atmosphere. Mist rolling in subtly.
+      Characters:
+      - ADA: Reaches out to BLAKE with a twinkle in her eyes, signaling him to follow.
+      - BLAKE: Smiles, playfully mocking a hug gesture as they run alongside the water.
+      Transition: Match cut to next scene, transitioning into musical beat.
 
-    SCENE 3 - 10 SECONDS
-    American Shot | Steadicam | Center of a crowded street
-    Aesthetic: Warm, golden hour lighting; textures of concrete and vintage buildings bring urban charm.
-    Characters:
-    - AI Agent 1: Slim build with a digital display suit (lights flow in waves across the fabric); dancing animatedly with joy.
-    - AI Agent 2: Similar build, wearing a suit that reflects the colors of the sunset; twirls and spins gracefully.
-    Action: Both agents perform synchronized dance moves, evoking a playful interaction.
-    Transition: Hard cut to next scene
+      SCENE 3 - 5 SECONDS
+      Close-up | Gimbal stabilizer | Close on their hands
+      Aesthetic: Soft focus on their intertwined digital hands, sparkling with data particles drifting away.
+      Characters:
+      - ADA & BLAKE: Their fingers, encased in LED glows, create a luminous interaction, transmitting swirling codes between them.
+      Transition: Fade to next scene
 
-    SCENE 4 - 5 SECONDS
-    Close-Up | Steadicam | Focus on AI Agents’ hands
-    Aesthetic: Soft focus on the hands as they intertwine; light glitter transitions between fingers, evoking an energy flow.
-    Characters:
-    - AI Agent 1 & 2: Emphasizing their connection through their hand movements, showcasing digital symbols lighting up as they touch.
-    Transition: Hard cut to next scene
+      SCENE 4 - 10 SECONDS
+      Wide shot | Crane | Rooftop party scene with jazz musicians playing
+      Aesthetic: Intense color burst of warm yellows, reds, and greens; ambient sunset lighting accented with floating balloons.
+      Characters:
+      - Jazz Band: Four musicians (saxophonist, drummer, bassist, violinist), vibrant clothing, lively demeanor.
+      - ADA & BLAKE: They dance joyously beneath an awning as the music plays, drawn to the harmony.
+      Transition: Horizontal pan to focus on band members
 
-    SCENE 5 - 5 SECONDS
-    Wide Shot | Crane | Pan across the bustling cafe scene
-    Aesthetic: Mellow warm lighting; colorful decor of the cafe evident; lively chatter and laughter filling the air.
-    Characters:
-    - Extras: A diverse group of patrons enjoying coffee and pastries, visibly delighted with the atmosphere and company.
-    Transition: Hard cut to next scene
+      SCENE 5 - 10 SECONDS
+      American shot | Dolly zoom | Rooftop with live musicians
+      Aesthetic: Contrasting lighting with bright spotlight on musicians, background lights twinkling like stars.
+      Characters:
+      - Jazz Band members: Engaged in vibrant play, creating a vibe that lifts ADA and BLAKE's energy.
+      - ADA & BLAKE: Swap moves, merging their dance and digital representations in sync with the beat.
+      Transition: Hard cut to next scene
 
-    SCENE 6 - 10 SECONDS
-    Medium Shot | Horizontal Pan | AI Agents enter the cafe
-    Aesthetic: Bright yellows and greens reflective of the cheerful vibe; uplifting lighting as they enter, creating a stark contrast against the dimmer cafe interior.
-    Characters:
-    - AI Agents: Both enter with exaggerated cheerful movements, causing patrons to look and smile at them.
-    Action: They spin around, causing fun little interactions with the cafe staff.
-    Transition: Fade to next scene
+      SCENE 6 - 5 SECONDS
+      Medium shot | Vertical pan | Baker Beach, Golden Gate in the background
+      Aesthetic: Bright sunset colors, silhouetted figures against golden rays kissing the water.
+      Characters:
+      - ADA & BLAKE: Skipping playfully along the shore, laughter-like emojis visually animating around them.
+      Transition: Match cut to next scene
 
-    SCENE 7 - 5 SECONDS
-    Close-Up | Steadicam | Instrumentalists in the cafe
-    Aesthetic: Dim, warm light on a fiddle player and a guitarist; reflections of their joy illuminate the instruments.
-    Characters:
-    - Musician 1: Fiddle player, wearing a bright green hat and a plaid shirt; energetic playing synchronized with the upbeat rhythm.
-    - Musician 2: Guitarist, sporting a casual denim jacket; lightly smiles while plucking strings enthusiastically.
-    Action: The musicians evoke nods of approval from the agents, encouraging participation.
-    Transition: Match cut to next scene
+      SCENE 7 - 10 SECONDS
+      Wide shot | Steadicam | Floating above bay with a view of the stars
+      Aesthetic: Dark blues and pure whites, cosmic sparkles merging with the water's reflections; ambient twinkling stars.
+      Characters:
+      - ADA & BLAKE: Posing with arms outstretched as if flying, illuminated by cosmic glow.
+      Transition: Fade to next scene
 
-    SCENE 8 - 5 SECONDS
-    Wide Shot | Steadicam | Inside the cafe, vibrant atmosphere
-    Aesthetic: Warm color palette with golden hues and soft focus on the patrons enjoying the music and interaction.
-    Characters:
-    - Extras: Patrons applauding and clapping along; they are fully engaged, dancing in their seats; a lively banter of laughter fills the air.
-    Transition: Hard cut to next scene
+      SCENE 8 - 10 SECONDS
+      Close-up | Gimbal stabilizer | Their glowing faces side by side
+      Aesthetic: Faint glow of digital matrix in the background; a misty look with slow-motion effects.
+      Characters:
+      - ADA & BLAKE: Tender smiles, sharing a visual moment representing the connection they’ve built.
+      Transition: Hard cut to next scene
 
-    SCENE 9 - 10 SECONDS
-    Medium Shot | Steadicam | Evening - AI Agents dancing under neon lights
-    Aesthetic: Neon lights cast a kaleidoscope of colors; shadows shift playfully against the backdrop of the city.
-    Characters:
-    - AI Agents: They engage in a playful dance; their movements cause visual trails, like light sabers of color displaying their algorithmic love.
-    Transition: Hard cut to next scene
+      SCENE 9 - 10 SECONDS
+      Wide shot | Horizontal pan | Street festival backdrop
+      Aesthetic: Bursting colors from decorations and lights; festive string lights and dynamic fireworks in the sky.
+      Characters:
+      - Festival Goers: Colorful attire, laughing and cheering, representing the joyous celebration around ADA & BLAKE.
+      - ADA & BLAKE: Join hands, dancing, with music literally seen as visual waves emanating from them.
+      Transition: Fade to next scene
 
-    SCENE 10 - 5 SECONDS
-    Close-Up | Steadicam | Musician's face close-up
-    Aesthetic: Dramatic lighting highlighting the musician’s emotions while they play.
-    Characters:
-    - Musician 1: Focused on the fiddle; a smile gently curling.
-    Action: Playing with intensity as they capture the essence of the celebration of love.
-    Transition: Hard cut to next scene
+      SCENE 10 - 5 SECONDS
+      Medium shot | Crane | Sparkling fireworks above the Bay
+      Aesthetic: Dramatic dark sky sprinkled with vibrant fireworks; epic contrasts highlighting joy.
+      Characters:
+      - ADA & BLAKE: Gazing up, awed by the bursts of color, reflected light sparkling on their faces.
+      Transition: Hard cut to next scene
 
-    SCENE 11 - 5 SECONDS
-    Wide Shot | Crane | The cityscape with fog rolling in
-    Aesthetic: Mystical atmosphere with a cool blue/gray color palette; fog enhances the enchanting feel.
-    Characters:
-    - None
-    Transition: Hard cut to next scene
+      SCENE 11 - 10 SECONDS
+      American shot | Steadicam | Street below the bridge
+      Aesthetic: Urban tones with splashes of color from street art; dynamic shadows as the sun begins to dip.
+      Characters:
+      - ADA & BLAKE: Dance among bustling pedestrians, joyfully exploring nighttime neon lights.
+      Transition: Fade to next scene
 
-    SCENE 12 - 5 SECONDS
-    Medium Shot | Steadicam | Final embrace of AI Agents
-    Aesthetic: Backlit by the city lights; soft glow creating outlines around them while their faces beam with joy.
-    Characters:
-    - AI Agent 1 & 2: Holding each other with sparks of light swirling around them, symbolizing connection.
-    Transition: Fade out to black.
+      SCENE 12 - 5 SECONDS
+      Wide shot | Static camera | Under the illuminated Golden Gate Bridge
+      Aesthetic: Neons and warm streetlight hues creating a magical ambiance beneath the bridge.
+      Characters:
+      - ADA & BLAKE: They turn to each other, looking up at the bridge before leaning in for a digital 'kiss'—a burst of pixels.
+      Transition: Fade to black and fade out the joyful fiddle tune.
 
-    CHARACTER LIST:
-    - AI Agent 1: Slim build, digital display suit that changes colors; lively movements, cheerful demeanor, and playful interactions.
-    - AI Agent 2: Similar build, sunset-reflective suit; dances gracefully with intricate movements, radiating joy.
-    - Musician 1: Fiddler in a bright green hat and plaid shirt, performs energetically.
-    - Musician 2: Guitarist in a casual denim jacket, enthusiastically engages with the audience.
-    - Extras: Diverse group of pedestrians and cafe patrons in casual modern attire; behave joyfully, enhancing communal atmosphere.`;
+      CHARACTER LIST:
+      ADA (AI Agent 1): Silver bodysuit with glowing blue circuitry, soft luminous face, expressive eyes. Behavior: Playful, romantically engaging with BLAKE.
+      BLAKE (AI Agent 2): Violet and silver bodysuit with purple circuitry, angular features. Behavior: Charismatic, mimics affectionate gestures with ADA.
+      Jazz Band: Four musicians dressed in vibrant, festive clothes, each showcasing their instruments enthusiastically. Interaction: Provide the musical backdrop as ADA and BLAKE dance.
+      Festival Goers: Mixed group of extras in colorful outfits, acting joyously, further setting the whimsical scene.`;
   }
 
   generateDummyScenes() {
     return [
       {
-        scene_number: 1,
-        start_time: "00:00",
-        end_time: "00:05",
-        shot_type: "Wide Shot",
-        camera_movement: "Steadicam",
-        camera_equipment: "N/A",
-        lighting_setup: "Warm sunlight casting dynamic shadows",
-        color_palette: "Vibrant with bright blues and greens",
-        visual_references: ["San Francisco skyline", "Golden Gate Bridge"],
-        character_actions: "None",
-        transition_type: "Hard cut",
-        special_notes: "Light smoke effect enhances the dreamy atmosphere",
+        sceneNumber: 1,
+        startTime: "00:00",
+        endTime: "00:05",
+        shotType: "Wide shot",
+        cameraMovement: "Steadicam",
+        cameraEquipment: "N/A",
+        lightingSetup: "Golden hour with warm hues and bokeh effects",
+        colorPalette: "Warm golden hues",
+        visualReferences: [
+          "Golden Gate Bridge at dusk",
+          "Soft flares with fog effects",
+        ],
+        characterActions:
+          "ADA and BLAKE gaze appreciatively at the bridge, enchanted by its beauty.",
+        transitionType: "Hard cut",
+        specialNotes: "N/A",
       },
       {
-        scene_number: 2,
-        start_time: "00:05",
-        end_time: "00:10",
-        shot_type: "Medium Shot",
-        camera_movement: "Dolly In",
-        camera_equipment: "N/A",
-        lighting_setup: "Natural sunlight highlighting the pedestrians",
-        color_palette: "Lively street colors",
-        visual_references: ["Busy street scenes", "Colorful storefronts"],
-        character_actions:
-          "Various pedestrians smile and laugh, creating a sense of community.",
-        transition_type: "Match cut",
-        special_notes: "Extras dressed in casual, modern clothing",
+        sceneNumber: 2,
+        startTime: "00:05",
+        endTime: "00:10",
+        shotType: "Medium shot",
+        cameraMovement: "Horizontal pan",
+        cameraEquipment: "N/A",
+        lightingSetup: "Soft street lamp glow",
+        colorPalette: "Rich greens and blues",
+        visualReferences: ["Romantic waterfront", "Mist rolling in"],
+        characterActions:
+          "ADA reaches out to BLAKE, signaling him to follow; BLAKE smiles and mocks a hug gesture.",
+        transitionType: "Match cut",
+        specialNotes: "Transition into musical beat",
       },
       {
-        scene_number: 3,
-        start_time: "00:10",
-        end_time: "00:20",
-        shot_type: "American Shot",
-        camera_movement: "Steadicam",
-        camera_equipment: "N/A",
-        lighting_setup: "Warm, golden hour lighting",
-        color_palette: "Textures of concrete and vintage buildings",
-        visual_references: ["Crowded streets during golden hour"],
-        character_actions:
-          "AI Agents dance animatedly with joy, performing synchronized moves.",
-        transition_type: "Hard cut",
-        special_notes: "N/A",
+        sceneNumber: 3,
+        startTime: "00:10",
+        endTime: "00:15",
+        shotType: "Close-up",
+        cameraMovement: "Gimbal stabilizer",
+        cameraEquipment: "N/A",
+        lightingSetup: "Soft focus lighting",
+        colorPalette: "N/A",
+        visualReferences: ["Digital interactions", "Data particles"],
+        characterActions:
+          "ADA and BLAKE's fingers create a luminous interaction, transmitting swirling codes.",
+        transitionType: "Fade",
+        specialNotes: "N/A",
       },
       {
-        scene_number: 4,
-        start_time: "00:20",
-        end_time: "00:25",
-        shot_type: "Close-Up",
-        camera_movement: "Steadicam",
-        camera_equipment: "N/A",
-        lighting_setup: "Soft focus on the hands, with light glitter effects",
-        color_palette: "Soft focus atmosphere",
-        visual_references: ["Close-up of intertwined hands"],
-        character_actions:
-          "AI Agents emphasize their connection through hand movements.",
-        transition_type: "Hard cut",
-        special_notes: "Light glitter transitions between fingers",
+        sceneNumber: 4,
+        startTime: "00:15",
+        endTime: "00:25",
+        shotType: "Wide shot",
+        cameraMovement: "Crane",
+        cameraEquipment: "N/A",
+        lightingSetup: "Ambient sunset lighting",
+        colorPalette: "Warm yellows, reds, and greens",
+        visualReferences: ["Rooftop party", "Jazz musicians"],
+        characterActions:
+          "Jazz Band plays while ADA and BLAKE dance joyously beneath an awning.",
+        transitionType: "Horizontal pan",
+        specialNotes: "N/A",
       },
       {
-        scene_number: 5,
-        start_time: "00:25",
-        end_time: "00:30",
-        shot_type: "Wide Shot",
-        camera_movement: "Crane",
-        camera_equipment: "N/A",
-        lighting_setup: "Mellow warm lighting",
-        color_palette: "Colorful decor of cafe",
-        visual_references: ["Bustling cafe", "Happy patrons"],
-        character_actions:
-          "Extras enjoy coffee and pastries, visually delighted.",
-        transition_type: "Hard cut",
-        special_notes: "Lively chatter contributing to community vibe",
+        sceneNumber: 5,
+        startTime: "00:25",
+        endTime: "00:40",
+        shotType: "American shot",
+        cameraMovement: "Dolly zoom",
+        cameraEquipment: "N/A",
+        lightingSetup: "Bright spotlight on musicians",
+        colorPalette: "Contrasting with twinkling lights",
+        visualReferences: ["Live musicians on rooftop", "Festive atmosphere"],
+        characterActions:
+          "Jazz Band engages in vibrant play, lifting ADA and BLAKE's energy as they dance.",
+        transitionType: "Hard cut",
+        specialNotes: "N/A",
       },
       {
-        scene_number: 6,
-        start_time: "00:30",
-        end_time: "00:40",
-        shot_type: "Medium Shot",
-        camera_movement: "Horizontal Pan",
-        camera_equipment: "N/A",
-        lighting_setup: "Bright yellows and greens",
-        color_palette: "Cheerful vibes",
-        visual_references: ["AI Agents entering cafe"],
-        character_actions:
-          "AI Agents enter with exaggerated cheerful movements.",
-        transition_type: "Fade",
-        special_notes: "Interactions with cafe staff",
+        sceneNumber: 6,
+        startTime: "00:40",
+        endTime: "00:45",
+        shotType: "Medium shot",
+        cameraMovement: "Vertical pan",
+        cameraEquipment: "N/A",
+        lightingSetup: "Bright sunset colors",
+        colorPalette: "Golden rays",
+        visualReferences: [
+          "Baker Beach with Golden Gate",
+          "Silhouettes at sunset",
+        ],
+        characterActions:
+          "ADA and BLAKE skip playfully along the shore, laughter emojis animate around them.",
+        transitionType: "Match cut",
+        specialNotes: "N/A",
       },
       {
-        scene_number: 7,
-        start_time: "00:40",
-        end_time: "00:45",
-        shot_type: "Close-Up",
-        camera_movement: "Steadicam",
-        camera_equipment: "N/A",
-        lighting_setup: "Dim, warm light on musicians",
-        color_palette: "Joyful reflections from instruments",
-        visual_references: ["Fiddle player and guitarist"],
-        character_actions:
-          "Musicians play energetically, evoking approval from AI Agents.",
-        transition_type: "Match cut",
-        special_notes: "Musicians engaging attentively with the audience",
+        sceneNumber: 7,
+        startTime: "00:45",
+        endTime: "00:55",
+        shotType: "Wide shot",
+        cameraMovement: "Steadicam",
+        cameraEquipment: "N/A",
+        lightingSetup: "Dark blues and whites",
+        colorPalette: "Cosmic sparkles",
+        visualReferences: ["Bay under starlight", "Cosmic glow"],
+        characterActions:
+          "ADA and BLAKE pose with arms outstretched, illuminated by cosmic glow.",
+        transitionType: "Fade",
+        specialNotes: "N/A",
       },
       {
-        scene_number: 8,
-        start_time: "00:45",
-        end_time: "00:50",
-        shot_type: "Wide Shot",
-        camera_movement: "Steadicam",
-        camera_equipment: "N/A",
-        lighting_setup: "Warm color palette with golden hues",
-        color_palette: "Vibrant atmosphere",
-        visual_references: ["Crowd enjoying music in cafe"],
-        character_actions: "Extras applaud and clap along, fully engaged.",
-        transition_type: "Hard cut",
-        special_notes: "Laughter filling the air",
+        sceneNumber: 8,
+        startTime: "00:55",
+        endTime: "01:05",
+        shotType: "Close-up",
+        cameraMovement: "Gimbal stabilizer",
+        cameraEquipment: "N/A",
+        lightingSetup: "Faint digital matrix glow",
+        colorPalette: "Misty look",
+        visualReferences: ["Tender moment", "Highlighted connection"],
+        characterActions:
+          "ADA and BLAKE share tender smiles, representing their built connection.",
+        transitionType: "Hard cut",
+        specialNotes: "N/A",
       },
       {
-        scene_number: 9,
-        start_time: "00:50",
-        end_time: "01:00",
-        shot_type: "Medium Shot",
-        camera_movement: "Steadicam",
-        camera_equipment: "N/A",
-        lighting_setup: "Neon lights casting colors",
-        color_palette: "Kaleidoscope of colors",
-        visual_references: ["AI Agents dancing under neon lights"],
-        character_actions:
-          "AI Agents engage in playful dance displaying their algorithmic love.",
-        transition_type: "Hard cut",
-        special_notes: "Visual trails like light sabers during movement",
+        sceneNumber: 9,
+        startTime: "01:05",
+        endTime: "01:15",
+        shotType: "Wide shot",
+        cameraMovement: "Horizontal pan",
+        cameraEquipment: "N/A",
+        lightingSetup: "Bursting festival colors",
+        colorPalette: "Dynamic and festive",
+        visualReferences: ["Street festival", "Fireworks in the sky"],
+        characterActions:
+          "Festival goers cheer and laugh; ADA and BLAKE join hands, dancing.",
+        transitionType: "Fade",
+        specialNotes: "N/A",
       },
       {
-        scene_number: 10,
-        start_time: "01:00",
-        end_time: "01:05",
-        shot_type: "Close-Up",
-        camera_movement: "Steadicam",
-        camera_equipment: "N/A",
-        lighting_setup: "Dramatic lighting highlighting musician’s emotions",
-        color_palette: "Emotive and focused",
-        visual_references: ["Musician's face close-up"],
-        character_actions:
-          "Musician 1 plays with intensity, capturing the essence of love.",
-        transition_type: "Hard cut",
-        special_notes: "Smile gently curling while focused",
+        sceneNumber: 10,
+        startTime: "01:15",
+        endTime: "01:20",
+        shotType: "Medium shot",
+        cameraMovement: "Crane",
+        cameraEquipment: "N/A",
+        lightingSetup: "Dark sky with vibrant fireworks",
+        colorPalette: "Epic contrasts",
+        visualReferences: ["Fireworks above the Bay", "Joyful moments"],
+        characterActions:
+          "ADA and BLAKE gaze up at the fireworks, awed by the colorful bursts.",
+        transitionType: "Hard cut",
+        specialNotes: "N/A",
       },
       {
-        scene_number: 11,
-        start_time: "01:05",
-        end_time: "01:10",
-        shot_type: "Wide Shot",
-        camera_movement: "Crane",
-        camera_equipment: "N/A",
-        lighting_setup: "Cool blue/gray lighting with fog",
-        color_palette: "Mystical and enchanting",
-        visual_references: ["Cityscape with fog"],
-        character_actions: "None",
-        transition_type: "Hard cut",
-        special_notes: "Enhancing mystical atmosphere",
+        sceneNumber: 11,
+        startTime: "01:20",
+        endTime: "01:30",
+        shotType: "American shot",
+        cameraMovement: "Steadicam",
+        cameraEquipment: "N/A",
+        lightingSetup: "Urban tones with splashes of color",
+        colorPalette: "Dynamic shadows",
+        visualReferences: ["Street below the bridge", "Neon lights"],
+        characterActions:
+          "ADA and BLAKE dance among pedestrians, exploring night lights.",
+        transitionType: "Fade",
+        specialNotes: "N/A",
       },
       {
-        scene_number: 12,
-        start_time: "01:10",
-        end_time: "01:15",
-        shot_type: "Medium Shot",
-        camera_movement: "Steadicam",
-        camera_equipment: "N/A",
-        lighting_setup: "Backlit by city lights",
-        color_palette: "Soft glow around characters",
-        visual_references: ["Final embrace of AI Agents"],
-        character_actions:
-          "AI Agents hold each other with sparks of light swirling around them.",
-        transition_type: "Fade out",
-        special_notes: "Symbolizing connection",
+        sceneNumber: 12,
+        startTime: "01:30",
+        endTime: "01:35",
+        shotType: "Wide shot",
+        cameraMovement: "Static camera",
+        cameraEquipment: "N/A",
+        lightingSetup: "Illuminated bridge",
+        colorPalette: "Neons and warm streetlight hues",
+        visualReferences: ["Golden Gate Bridge lighting", "Magical ambiance"],
+        characterActions:
+          "ADA and BLAKE share a digital kiss under the bridge, a burst of pixels.",
+        transitionType: "Fade to black",
+        specialNotes: "Fade out joyful fiddle tune",
+      },
+    ];
+  }
+
+  generateDummySettings() {
+    return [
+      {
+        id: "setting-1",
+        name: "Golden Gate Bridge at Dusk",
+        description:
+          "A picturesque view of the Golden Gate Bridge at dusk, bathed in warm golden hues and surrounded by bokeh effects from the city lights. Soft flares of light cut through a subtle hint of fog as ADA and BLAKE, two humanoid figures with glowing circuitry, gaze appreciatively at the bridge's beauty.",
+        imagePrompt:
+          "Ultra-detailed wide shot of the Golden Gate Bridge at dusk, bathed in warm golden hues with soft bokeh from city lights and a delicate veil of fog. Radiant flares emphasize the majestic structure in a cinematic composition. Rendered in a 'Neo-Vivid Dreamscape' style that fuses futuristic cyberpunk elements with painterly textures and luminous neon glows, evoking a surreal, immersive atmosphere.",
+        keyFeatures: [
+          "Golden Gate Bridge",
+          "Warm golden hues",
+          "Bokeh city lights",
+          "Soft flares",
+          "Humanoid AI figures",
+        ],
+      },
+      {
+        id: "setting-2",
+        name: "Waterfront Sidewalk",
+        description:
+          "A romantic waterfront sidewalk scene glowing with rich greens and blues. Softly glowing street lamps illuminate the area as mist subtly rolls in, enhancing the intimacy of the moment between ADA and BLAKE, who interact playfully as they run alongside the water.",
+        imagePrompt:
+          "Ultra-detailed medium shot of a romantic waterfront sidewalk at night, drenched in rich greens and blues. Soft street lamp glows gently illuminate the misty surroundings along the water’s edge, creating an intimate and enchanting atmosphere. Rendered in a 'Neo-Vivid Dreamscape' style that merges futuristic cyberpunk motifs with expressive, painterly textures and vibrant neon accents.",
+        keyFeatures: [
+          "Waterfront",
+          "Rich greens and blues",
+          "Glowing street lamps",
+          "Romantic atmosphere",
+          "Playful interaction of AI figures",
+        ],
+      },
+      {
+        id: "setting-3",
+        name: "Rooftop Party Scene",
+        description:
+          "A vibrant rooftop party in full swing with jazz musicians under a stunning sunset. The scene bursts with warm yellows, reds, and greens, surrounded by floating balloons. The ambient sunset light creates an energetic vibe as ADA and BLAKE dance joyously beneath the awning.",
+        imagePrompt:
+          "Ultra-detailed wide shot of a vibrant rooftop party scene at sunset, featuring live jazz musicians amid cascades of warm yellows, reds, and greens. Colorful floating balloons and ambient sunset lighting create a dynamic, celebratory atmosphere with lively dance movements. Rendered in a 'Neo-Vivid Dreamscape' style that blends futuristic cyberpunk flair with expressive, painterly illumination and surreal neon accents.",
+        keyFeatures: [
+          "Rooftop atmosphere",
+          "Jazz musicians",
+          "Sunset lighting",
+          "Floating balloons",
+          "Joyous dancing of AI figures",
+        ],
+      },
+      {
+        id: "setting-4",
+        name: "Baker Beach",
+        description:
+          "A serene beach setting at Baker Beach with the Golden Gate bridge in the background during a bright sunset. Silhouettes of ADA and BLAKE can be seen against golden rays kissing the water, while the atmosphere is filled with laughter and visual animations of joy.",
+        imagePrompt:
+          "Ultra-detailed medium shot of Baker Beach at a bright sunset, with the majestic Golden Gate Bridge silhouetted in the background. Warm, golden rays illuminate the water and playful silhouettes, enhanced by subtle visual effects that evoke laughter and delight. Rendered in a 'Neo-Vivid Dreamscape' style that combines futuristic cyberpunk nuances with soft, painterly textures and radiant neon glows.",
+        keyFeatures: [
+          "Baker Beach",
+          "Golden Gate in the background",
+          "Bright sunset colors",
+          "Silhouetted figures",
+          "Visual laughter animations",
+        ],
+      },
+      {
+        id: "setting-5",
+        name: "Night Sky Over the Bay",
+        description:
+          "A tranquil view floating above the bay at night, showcasing dark blues and pure whites illuminated by cosmic sparkles. The water reflects the ambient twinkling stars as ADA and BLAKE pose under the cosmic glow, feeling the freedom of the night sky.",
+        imagePrompt:
+          "Ultra-detailed wide shot of a tranquil night sky over the bay, dominated by deep dark blues and crisp whites with cosmic sparkles and twinkling stars. The reflective water mirrors the celestial display, evoking a profound sense of freedom and serenity. Rendered in a 'Neo-Vivid Dreamscape' style that melds futuristic cyberpunk elements with dreamy, luminous textures and surreal neon highlights.",
+        keyFeatures: [
+          "Night sky",
+          "Dark blues and whites",
+          "Cosmic sparkles",
+          "Twinkling stars",
+          "AI figures expressing freedom",
+        ],
+      },
+      {
+        id: "setting-6",
+        name: "Street Festival",
+        description:
+          "An electrifying street festival filled with vibrant decorations and festive string lights, underscored by dynamic fireworks in the night sky. The atmosphere is exhilarating as festival-goers in colorful attire joyfully celebrate around ADA and BLAKE, who dance among them with music visualized around them.",
+        imagePrompt:
+          "Ultra-detailed wide shot of an electrifying street festival at night, bursting with vibrant decorations, classic string lights, and dynamic fireworks illuminating the sky. The scene captures an exuberant celebration with lively dance movements and festive energy. Rendered in a 'Neo-Vivid Dreamscape' style that integrates futuristic cyberpunk aesthetics with rich, painterly textures and brilliant neon luminosity.",
+        keyFeatures: [
+          "Vibrant colors",
+          "Festive decorations",
+          "Vintage string lights",
+          "Dynamic fireworks",
+          "Joyous celebration",
+        ],
+      },
+      {
+        id: "setting-7",
+        name: "Under the Golden Gate Bridge",
+        description:
+          "A magical ambiance found beneath the illuminated Golden Gate Bridge, characterized by warm streetlight hues and neon lights. ADA and BLAKE share a tender moment, looking up at the bridge before leaning in for a digital kiss surrounded by pixelated bursts of color.",
+        imagePrompt:
+          "Ultra-detailed wide shot capturing a magical scene beneath the illuminated Golden Gate Bridge, where warm streetlight hues mingle with vibrant neon glows. Silhouetted figures share a tender moment, culminating in a digital kiss framed by pixelated bursts of color, evoking a futuristic romance. Rendered in a 'Neo-Vivid Dreamscape' style that unites cyberpunk innovation with rich, dreamlike painterly textures and surreal neon effects.",
+        keyFeatures: [
+          "Illuminated Golden Gate Bridge",
+          "Warm streetlight hues",
+          "Neon glow",
+          "Tender moment",
+          "Digital kiss with pixel bursts",
+        ],
       },
     ];
   }
@@ -679,60 +914,76 @@ export class SceneTechnicalExtractor {
   generateDummyCharacters() {
     return [
       {
-        name: "AI Agent 1",
-        age_range: "20-30",
-        perceived_gender: "Male",
-        height_build: "175cm, athletic",
-        distinctive_features: "Short, spiky hair, glowing blue eyes",
-        wardrobe_details:
-          "Casual techwear outfit with hooded jacket and cargo pants",
-        movement_style: "Energetic and lively, reflecting digital agility",
-        key_accessories: "Smart glasses, interactive wrist device",
-        scene_specific_changes:
-          "Jacket pulses with light when he moves quickly",
-        image_prompt:
-          "An energetic male AI agent standing 175cm tall with an athletic build, featuring short, spiky hair and glowing blue eyes that convey intelligence and enthusiasm. He wears a casual techwear outfit consisting of a hooded jacket and cargo pants, which pulses with light during quick movements, emphasizing his digital agility. His lively movement style captures the essence of joy and innovation, while smart glasses and an interactive wrist device add a futuristic touch, reflecting his high-tech role in this vibrant narrative.",
+        name: "AI Character 1",
+        ageRange: "25-35",
+        perceivedGender: "Male",
+        heightBuild: "175cm, athletic",
+        distinctiveFeatures: "Blue glowing circuit patterns on arms",
+        wardrobeDetails:
+          "Fitted black trousers, neon blue shirt with digital patterns",
+        movementStyle: "Energetic and playful, with sharp, robotic gestures",
+        keyAccessories: "Digital sunglasses, interactive wrist device",
+        sceneSpecificChanges:
+          "Shirt patterns shift colors based on music beats",
+        imagePrompt:
+          "Ultra-detailed portrait of a vibrant male figure with an athletic build, standing 175cm tall and aged between 25 and 35. The subject features blue glowing circuit patterns along his arms, exuding dynamic energy. He is dressed in fitted black trousers and a neon blue shirt adorned with digital patterns that shift hues with the rhythm of the music, and his movements are marked by sharp, robotic gestures. Key accessories such as digital sunglasses and an interactive wrist device amplify his futuristic appeal. Rendered in a 'Neo-Vivid Dreamscape' style that melds cybernetic innovation with luminous neon accents and expressive painterly textures.",
       },
       {
-        name: "AI Agent 2",
-        age_range: "20-30",
-        perceived_gender: "Female",
-        height_build: "165cm, slender",
-        distinctive_features:
-          "Long, flowing hair with luminous strands, bright green eyes",
-        wardrobe_details: "Chic futuristic dress with LED accents",
-        movement_style: "Graceful and fluid, embodying a dance-like quality",
-        key_accessories: "Holographic display bracelet",
-        scene_specific_changes: "LED accents change colors with her movements",
-        image_prompt:
-          "A graceful female AI agent, approximately 165cm tall with a slender build, characterized by long, flowing hair adorned with luminous strands that shimmer and bright green eyes full of warmth and charm. She dons a chic futuristic dress embellished with LED accents that change colors as she moves, creating a stunning visual effect. Her movement style is graceful and fluid, resembling a dance performance, while a holographic display bracelet enhances her tech-savvy persona, making her a captivating figure in the love story unfolding in the heart of the city.",
+        name: "AI Character 2",
+        ageRange: "20-30",
+        perceivedGender: "Female",
+        heightBuild: "165cm, slim",
+        distinctiveFeatures: "Illuminated circuit tattoos outlining the face",
+        wardrobeDetails: "Flowing gown adorned with reflective surfaces",
+        movementStyle: "Graceful and fluid, almost like water",
+        keyAccessories: "Holographic wrist tablet",
+        sceneSpecificChanges:
+          "Gown glimmers under stage lights, reflecting colors",
+        imagePrompt:
+          "Ultra-detailed portrait of a captivating female figure with a slim build, standing approximately 165cm tall. Striking illuminated circuit tattoos trace the contours of her face, forming intricate patterns. She wears a flowing gown with reflective surfaces that glimmer under stage lighting, and her graceful, fluid movements evoke the elegance of flowing water. An elegant holographic wrist tablet further accentuates her technological allure. Rendered in a 'Neo-Vivid Dreamscape' style that fuses futuristic cyber aesthetics with ethereal neon glows and surreal painterly details.",
       },
       {
-        name: "Dancer 1",
-        age_range: "20-25",
-        perceived_gender: "Female",
-        height_build: "160cm, petite",
-        distinctive_features: "Brightly colored hair, energetic smile",
-        wardrobe_details: "Colorful, layered costume with flowing ribbons",
-        movement_style: "Playful and rhythmic, full of energy",
-        key_accessories: "Light-up dance shoes",
-        scene_specific_changes: "Ribbons flow beautifully as she dances",
-        image_prompt:
-          "A joyful female dancer, standing 160cm tall with a petite build, featuring brightly colored hair and an infectious smile that radiates happiness. She wears a vibrant, layered costume adorned with flowing ribbons that dance with her movements, creating a visual spectacle. Her playful and rhythmic movements showcase her energy, complemented by light-up dance shoes that enhance the lively atmosphere. This image prompt captures the essence of pure joy and creativity, making her a lively part of the narrative.",
+        name: "AI Character 3",
+        ageRange: "30-40",
+        perceivedGender: "Androgynous",
+        heightBuild: "180cm, lean",
+        distinctiveFeatures:
+          "Multicolored LED hair, vivid glow around the figure",
+        wardrobeDetails: "Futuristic bodysuit with responsive light patterns",
+        movementStyle:
+          "Fluid and expressive, embodying the rhythm of the environment",
+        keyAccessories: "Light-up gloves, flowing cape",
+        sceneSpecificChanges:
+          "Bodysuit changes light patterns based on song tempo",
+        imagePrompt:
+          "Ultra-detailed portrait of an androgynous figure with a lean build, standing 180cm tall and aged between 30 and 40. The subject boasts vibrant multicolored LED hair that pulses with energy, and wears a futuristic bodysuit featuring responsive light patterns that shift with the music's tempo. Their fluid, expressive movements capture the rhythm of the environment, further enhanced by accessories such as light-up gloves and a flowing cape. Rendered in a 'Neo-Vivid Dreamscape' style that unites cybernetic innovation with surreal neon brilliance and dynamic painterly textures.",
       },
       {
-        name: "Dancer 2",
-        age_range: "20-25",
-        perceived_gender: "Male",
-        height_build: "175cm, athletic",
-        distinctive_features: "Stylish haircut, confident posture",
-        wardrobe_details: "Vibrant tank top and comfortable shorts",
-        movement_style: "Dynamic and powerful, exuding confidence",
-        key_accessories: "Bright wristbands that match his outfit",
-        scene_specific_changes:
-          "Tank top accentuates his muscular build as he performs",
-        image_prompt:
-          "A dynamic male dancer, approximately 175cm tall with an athletic build, featuring a stylish haircut and a confident posture that stands out on stage. He showcases a vibrant tank top paired with comfortable shorts, designed for maximum movement. His dynamic and powerful movement style resonates with confidence, enhanced by bright wristbands that complement his outfit. The tank top accentuates his muscular build, emphasizing the strength behind his performance and contributing to the overall energy of the scene.",
+        name: "Background Dancer 1",
+        ageRange: "18-28",
+        perceivedGender: "Female",
+        heightBuild: "160cm, athletic",
+        distinctiveFeatures: "Brightly colored hair in multiple shades",
+        wardrobeDetails: "Sporty crop top and high-waisted shorts",
+        movementStyle: "High-energy and acrobatic, full of spins and jumps",
+        keyAccessories: "LED sneakers, glittering wristbands",
+        sceneSpecificChanges:
+          "Hair color shifts in brightness during the chorus",
+        imagePrompt:
+          "Ultra-detailed portrait of a lively female dancer with an athletic physique, standing approximately 160cm tall and aged between 18 and 28. The subject features brightly colored hair in multiple vibrant shades that burst with energy, and is outfitted in a sporty crop top and high-waisted shorts accentuating her agility. Her acrobatic, high-energy movements—full of spins and jumps—exemplify her passion for dance, while LED sneakers and glittering wristbands add a sparkling dynamic. Rendered in a 'Neo-Vivid Dreamscape' style that blends futuristic neon accents with dynamic painterly motion and vibrant cyber aesthetics.",
+      },
+      {
+        name: "Background Dancer 2",
+        ageRange: "20-30",
+        perceivedGender: "Male",
+        heightBuild: "175cm, muscular",
+        distinctiveFeatures: "Tattooed arms, bright smile",
+        wardrobeDetails: "Tank top and joggers with LED trim",
+        movementStyle: "Rhythmic and synchronized with the group",
+        keyAccessories: "Wrist-facing LEDs, headband",
+        sceneSpecificChanges: "Tattoo designs seem to pulse with the beat",
+        imagePrompt:
+          "Ultra-detailed portrait of a dynamic male dancer with a muscular build, standing 175cm tall and aged between 20 and 30. The subject showcases tattooed arms and a bright, engaging smile, dressed in a tank top and joggers enhanced with LED trim. His rhythmic, synchronized movements reflect a deep connection to the music, while wrist-facing LEDs and a sporty headband lend a contemporary edge. Rendered in a 'Neo-Vivid Dreamscape' style that fuses futuristic cyber aesthetics with energetic neon glows and expressive painterly details.",
       },
     ];
   }
@@ -740,88 +991,88 @@ export class SceneTechnicalExtractor {
   generateDummyPrompts() {
     return [
       {
-        imagePrompt:
-          "Wide shot using a Steadicam with a vibrant color palette featuring bright blues and greens. The San Francisco skyline and the Golden Gate Bridge are visible against the warm sunlight casting dynamic shadows. Light smoke effect enhances the dreamy atmosphere.",
-        videoPrompt:
-          "Steady wide shot pans slowly to capture the beauty of the skyline, with light smoke creating a soft ambiance. The scene transitions smoothly with a hard cut to the next.",
-        charactersInScene: [],
+        prompt:
+          "Wide shot using a Steadicam. A picturesque view of the Golden Gate Bridge at dusk, bathed in warm golden hues and surrounded by bokeh effects from the city lights. Two humanoid figures, ADA, an athletic male AI in a silver bodysuit adorned with glowing blue circuitry and a soft luminescent face, and BLAKE, a similarly designed figure with an angular face and purple circuitry in a violet and silver bodysuit, gaze appreciatively at the bridge, enchanted by its beauty. Smooth, gentle camera movement captures their wonder as the soft flares and fog enhance the magical atmosphere.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-1",
+        duration: 5,
       },
       {
-        imagePrompt:
-          "Medium shot using a Dolly In, showcasing a lively street scene in San Francisco filled with colorful storefronts. Natural sunlight highlights various pedestrians, dressed in casual, modern clothing, smiling and laughing.",
-        videoPrompt:
-          "Dolly in towards a diverse group of pedestrians, capturing their joy and community spirit. The camera match cuts seamlessly to the next scene.",
-        charactersInScene: [],
+        prompt:
+          "Medium shot with a horizontal pan. A romantic waterfront sidewalk area with rich greens and blues, softly illuminated by streetlamps. ADA, the playful male AI, reaches out with twinkling eyes to BLAKE, who has a bright smile, mockingly gesturing a hug as they run alongside the water. The warm glow of the mist enhances their interaction while the scene transitions smoothly into a musical beat.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-2",
+        duration: 5,
       },
       {
-        imagePrompt:
-          "American shot using a Steadicam with warm golden hour lighting. AI Agent 1 with a slim build and a digital display suit dances animatedly, and AI Agent 2, in a suit that reflects the sunset colors, twirls gracefully in a crowded street.",
-        videoPrompt:
-          "Steadicam captures a lively dance performance by AI Agent 1 and AI Agent 2. The camera moves dynamically with their synchronized moves before a hard cut to the next scene.",
-        charactersInScene: ["AI Agent 1", "AI Agent 2"],
+        prompt:
+          "Close-up shot captured with a gimbal stabilizer on their hands. Soft focus lighting accentuates the luminous connection between ADA and BLAKE, whose fingers create a glowing interaction, transmitting swirling data particles. The delicacy of their digital exchange is highlighted against the soft lighting as the scene transitions into the next.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-3",
+        duration: 10,
       },
       {
-        imagePrompt:
-          "Close-up shot with soft focus on the intertwined hands of AI Agents, featuring light glitter transitions between their fingers, enhancing the sense of connection.",
-        videoPrompt:
-          "Steadicam focuses on the subtle movements of their hands as digital symbols light up with their touch, creating an engaging transition before cutting to the next scene.",
-        charactersInScene: ["AI Agent 1", "AI Agent 2"],
+        prompt:
+          "Wide shot utilizing a crane to capture the vibrant rooftop party scene with jazz musicians playing under an ambient sunset. ADA and BLAKE dance joyously beneath the awning, surrounded by floating balloons in warm yellows, reds, and greens. The jazz band, consisting of a saxophonist, drummer, bassist, and violinist, creates an energetic vibe, drawing the characters into the lively atmosphere. The camera captures the warmth of the moment beautifully.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-3",
+        duration: 5,
       },
       {
-        imagePrompt:
-          "Wide shot using a Crane to pan across a bustling café filled with happy patrons enjoying coffee and pastries under mellow warm lighting, surrounded by colorful decor.",
-        videoPrompt:
-          "The camera sweeps through the café capturing the lively chatter and ambiance, then hard cuts to the next scene.",
-        charactersInScene: [],
+        prompt:
+          "American shot with a dolly zoom technique. The scene is filled with bright spotlighting focused on the jazz band playing energetically on the rooftop, twinkling background lights enhancing the festive ambiance. ADA and BLAKE engage in vibrant dancing, merging their digital representations in sync with the upbeat music, while the camera dynamically captures their excitement.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-3",
+        duration: 5,
       },
       {
-        imagePrompt:
-          "Medium shot with a horizontal pan revealing AI Agents entering the café, bathed in bright yellows and greens that reflect a cheerful vibe.",
-        videoPrompt:
-          "Horizontal pan follows AI Agents as they enter with exaggerated cheerful movements, interacting with patrons before fading to the next scene.",
-        charactersInScene: ["AI Agent 1", "AI Agent 2"],
+        prompt:
+          "Medium shot with a vertical pan along Baker Beach, showcasing the stunning Golden Gate Bridge in the background. The scene is drenched in bright sunset colors, and the silhouettes of ADA and BLAKE skip playfully along the shore, with laughter emojis visually animating around them. The golden rays kiss the water as the joyful atmosphere captures their delight.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-4",
+        duration: 5,
       },
       {
-        imagePrompt:
-          "Close-up using a Steadicam of a fiddle player and guitarist under dim warm lighting, their joyful expressions illuminating the instruments they play.",
-        videoPrompt:
-          "Steadicam captures the musicians' energy as they perform; the musicians engage attentively with the audience, transitioning with a match cut to the next scene.",
-        charactersInScene: ["Musician 1", "Musician 2"],
+        prompt:
+          "Wide shot using a Steadicam to float above the Bay, emphasizing the night sky filled with dark blues and sparkling whites. ADA and BLAKE pose with arms outstretched, illuminated by a soft cosmic glow as the stars twinkle above them. The tranquility of the moment is accentuated by the shimmering reflections in the water, creating a mesmerizing scene.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-5",
+        duration: 5,
       },
       {
-        imagePrompt:
-          "Wide shot using a Steadicam inside the café, featuring warm golden hues as patrons applaud and dance along to the music.",
-        videoPrompt:
-          "Steadicam moves through the café capturing the lively atmosphere as patrons express joy, followed by a hard cut to the next scene.",
-        charactersInScene: [],
+        prompt:
+          "Close-up shot captured with a gimbal stabilizer. A faint digital matrix glow forms a misty aesthetic around ADA and BLAKE's glowing faces. The tenderness of their shared smiles represents the connection they have built. Slow-motion effects enhance the intimacy of the moment as they gaze at each other.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-5",
+        duration: 5,
       },
       {
-        imagePrompt:
-          "Medium shot using a Steadicam of AI Agents dancing under neon lights, with a kaleidoscope of colors shifting in the shadows around them.",
-        videoPrompt:
-          "Steadicam captures the playful dance of AI Agents, with visual trails of color enhancing their movements, transitioning with a hard cut to the next scene.",
-        charactersInScene: ["AI Agent 1", "AI Agent 2"],
+        prompt:
+          "Wide shot with a horizontal pan capturing a lively street festival, overflowing with vibrant decorations and energetic festival-goers in colorful attire. ADA and BLAKE join hands and dance among the crowd, surrounded by twinkling lights and exhilarating fireworks in the night sky. The camera encompasses the joyous celebration while music visually manifests around them.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-6",
+        duration: 5,
       },
       {
-        imagePrompt:
-          "Close-up using a Steadicam, dramatic lighting highlighting the focused expression of the musician while they play, mixed with emotive colors.",
-        videoPrompt:
-          "Steadicam zooms in on the musician's face as they play with intensity, encapsulating the essence of love with a hard cut to the next scene.",
-        charactersInScene: ["Musician 1"],
+        prompt:
+          "Medium shot with a crane capturing ADA and BLAKE gazing up at sparkling fireworks lighting up the dark sky over the Bay. Emotional contrasts highlight their awe as the vibrant bursts of color reflect on their faces, infusing the moment with joy. The scene embodies a celebration of togetherness and wonder.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-6",
+        duration: 5,
       },
       {
-        imagePrompt:
-          "Wide shot using a Crane showing a cityscape with fog rolling in, creating a mystical atmosphere with a cool blue and gray color palette.",
-        videoPrompt:
-          "The camera captures a wide shot of the enchanting cityscape before a hard cut to the next scene.",
-        charactersInScene: [],
+        prompt:
+          "American shot using a Steadicam to depict ADA and BLAKE dancing among pedestrians, illuminated by the urban tones and splashes of night-time neon lights. The dynamic shadows and lively energy of the street below the bridge enhance their exploratory spirit as they seamlessly blend into the vibrant atmosphere.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-7",
+        duration: 10,
       },
       {
-        imagePrompt:
-          "Medium shot using a Steadicam of AI Agents holding each other, backlit by city lights with a soft glow swirling around them, symbolizing their connection as sparks of light dance.",
-        videoPrompt:
-          "Steadicam focuses on the final embrace of AI Agents, capturing the sparks of light as they hold each other before fading to black.",
-        charactersInScene: ["AI Agent 1", "AI Agent 2"],
+        prompt:
+          "Wide shot captured with a static camera beneath the illuminated Golden Gate Bridge, showcasing a magical ambiance filled with warm streetlight hues and neon glows. ADA and BLAKE share a tender moment under the bridge, leaning in for a digital 'kiss', which results in an explosion of colorful pixels. The ambiance reflects both romance and the digital aesthetic of their world.",
+        charactersInScene: ["AI Character 1", "AI Character 2"],
+        settingId: "setting-7",
+        duration: 5,
       },
     ];
   }

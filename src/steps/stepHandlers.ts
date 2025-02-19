@@ -33,6 +33,9 @@ export function processSteps(payments: Payments) {
       case "extractScenes":
         await handleScenesExtraction(step, payments, extractor);
         break;
+      case "generateSettings":
+        await handleSettingsGeneration(step, payments, extractor);
+        break;
       case "extractCharacters":
         await handleCharactersExtraction(step, payments, extractor);
         break;
@@ -52,7 +55,8 @@ export function processSteps(payments: Payments) {
  */
 async function handleInitStep(step: any, payments: Payments) {
   const scriptStepId = generateStepId();
-  const scenestepId = generateStepId();
+  const sceneStepId = generateStepId();
+  const settingsStepId = generateStepId();
   const characterStepId = generateStepId();
   const transformStepId = generateStepId();
 
@@ -60,28 +64,35 @@ async function handleInitStep(step: any, payments: Payments) {
     {
       step_id: scriptStepId,
       task_id: step.task_id,
-      predecessor: step.step_id, // "generateScript" follows "init"
+      predecessor: step.step_id,
       name: "generateScript",
       is_last: false,
     },
     {
-      step_id: scenestepId,
+      step_id: sceneStepId,
       task_id: step.task_id,
-      predecessor: scriptStepId, // "extractScenes" follows "generateScript"
+      predecessor: scriptStepId,
       name: "extractScenes",
+      is_last: false,
+    },
+    {
+      step_id: settingsStepId,
+      task_id: step.task_id,
+      predecessor: sceneStepId,
+      name: "generateSettings",
       is_last: false,
     },
     {
       step_id: characterStepId,
       task_id: step.task_id,
-      predecessor: scenestepId, // "extractCharacters" follows "extractScenes"
+      predecessor: settingsStepId,
       name: "extractCharacters",
       is_last: false,
     },
     {
       step_id: transformStepId,
       task_id: step.task_id,
-      predecessor: characterStepId, // "transformScenes" follows "extractCharacters"
+      predecessor: characterStepId,
       name: "transformScenes",
       is_last: true,
     },
@@ -125,7 +136,8 @@ async function handleScriptGeneration(
       !artifacts[0].title ||
       !artifacts[0].tags ||
       !artifacts[0].lyrics ||
-      !artifacts[0].idea
+      !artifacts[0].idea ||
+      !artifacts[0].duration
     ) {
       throw new Error("Missing required song metadata");
     }
@@ -205,6 +217,38 @@ async function handleScenesExtraction(
 }
 
 /**
+ * Handles the "generateSettings" step, extracting settings from the generated script.
+ *
+ * @param step
+ * @param payments
+ * @param extractor
+ */
+async function handleSettingsGeneration(
+  step: any,
+  payments: Payments,
+  extractor: SceneTechnicalExtractor
+) {
+  try {
+    const [{ script, scenes, lyrics, tags }] = JSON.parse(step.input_artifacts);
+    const settings = await extractor.extractSettings(script);
+
+    await payments.query.updateStep(step.did, {
+      ...step,
+      step_status: AgentExecutionStatus.Completed,
+      output: "Settings generation completed.",
+      output_artifacts: [{ script, scenes, settings, lyrics, tags }],
+    });
+  } catch (error) {
+    logger.error(`Error during settings generation: ${error.message}`);
+    await payments.query.updateStep(step.did, {
+      ...step,
+      step_status: AgentExecutionStatus.Failed,
+      output: "Failed to generate settings.",
+    });
+  }
+}
+
+/**
  * Handles the "extractCharacters" step, extracting characters from the generated script.
  */
 async function handleCharactersExtraction(
@@ -213,7 +257,9 @@ async function handleCharactersExtraction(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [{ script, scenes, lyrics, tags }] = JSON.parse(step.input_artifacts);
+    const [{ script, scenes, settings, lyrics, tags }] = JSON.parse(
+      step.input_artifacts
+    );
     const characters = await extractor.extractCharacters(
       step.input_query,
       lyrics,
@@ -226,7 +272,7 @@ async function handleCharactersExtraction(
       ...step,
       step_status: AgentExecutionStatus.Completed,
       output: "Characters extraction completed.",
-      output_artifacts: [script, scenes, characters],
+      output_artifacts: [{ script, settings, scenes, characters }],
     });
 
     logMessage(payments, {
@@ -253,19 +299,30 @@ async function handleScenesTransformation(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [script, scenes, characters] = JSON.parse(step.input_artifacts);
+    const [{ script, settings, scenes, characters }] = JSON.parse(
+      step.input_artifacts
+    );
     const transformedScenes = await extractor.transformScenes(
       scenes,
       characters,
+      settings,
       script
     );
     logger.info(`Transformed scenes: ${JSON.stringify(transformedScenes)}`);
+    logger.info("Sending data:");
+    logger.info(
+      JSON.stringify([
+        { transformedScenes, settings, characters, script, scenes },
+      ])
+    );
 
     await payments.query.updateStep(step.did, {
       ...step,
       step_status: AgentExecutionStatus.Completed,
       output: step.input_query,
-      output_artifacts: [{ transformedScenes, characters }],
+      output_artifacts: [
+        { transformedScenes, settings, characters, script, scenes },
+      ],
     });
 
     logMessage(payments, {

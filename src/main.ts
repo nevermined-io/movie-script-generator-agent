@@ -1,5 +1,10 @@
 import { processSteps } from "./steps/stepHandlers";
-import { NVM_API_KEY, NVM_ENVIRONMENT, AGENT_DID } from "./config/env";
+import {
+  NVM_API_KEY,
+  NVM_ENVIRONMENT,
+  AGENT_DID,
+  IS_DUMMY,
+} from "./config/env";
 import { logger } from "./logger/logger";
 import { Payments, EnvironmentName } from "@nevermined-io/payments";
 
@@ -17,6 +22,10 @@ export function initializePayments(): Payments {
   }
 
   logger.info(`Connected to Nevermined Network: ${NVM_ENVIRONMENT}`);
+
+  if (IS_DUMMY) {
+    logger.warn("Running in dummy mode. No transactions will be made.");
+  }
 
   return payments;
 }
