@@ -7,6 +7,7 @@ import {
   StringOutputParser,
 } from "@langchain/core/output_parsers";
 import { IS_DUMMY } from "./config/env";
+import { Scene } from "./types";
 
 /**
  * A custom Runnable to extract pure JSON from an LLM response (AIMessage), ignoring
@@ -69,11 +70,12 @@ export class SceneTechnicalExtractor {
       lyrics: string;
       tags: string;
       duration: number;
+      meanScenes: number;
     },
     string
   >;
   private sceneChain: RunnableSequence<
-    { script: string },
+    { script: string; duration: number },
     Record<string, any>[]
   >;
   private settingsChain: RunnableSequence<
@@ -86,7 +88,7 @@ export class SceneTechnicalExtractor {
   >;
   private technicalTransformationChain: RunnableSequence<
     { scenes: string; settings: string; characters: string; script: string },
-    Record<string, any>[]
+    Scene[]
   >;
 
   constructor(apiKey: string) {
@@ -123,10 +125,11 @@ export class SceneTechnicalExtractor {
            - Avoid spoken dialogue (unless part of song lyrics).  
            - Ensure coherence between visual atmosphere and music genre.
            - Every scene must have a duration of either 5 or 10 seconds.
-           - Plan accordingly the number of scenes given the total duration of the video. If the total duration of the video is, for example, 200 seconds, you should create 20 scenes of 10 seconds each or 40 scenes of 5 seconds each or a combination of both.
+           - Plan accordingly the number of scenes given the total duration of the video. 
+           - Optimal number of scenes: {meanScenes}.
         
         5. **Include Scenes with Live Musicians**:
-           - At least two scenes must feature a visible band or musicians playing instruments that complement the main story of the two AIs.
+           - At least two scenes must feature a visible band or musicians playing instruments that complement the main story.
            - Show how these musicians integrate into the video’s narrative or setting.
         
         **Output Format**:  
@@ -182,9 +185,9 @@ export class SceneTechnicalExtractor {
         - "specialNotes" (any additional gear, safety, or creative note)
         
         **Important**:
-        1. Preserve the **sceneNumber** from the script. If the script says "SCENE 1 - 20", interpret that as sceneNumber = 1 and duration = 20 seconds.
-        2. Convert durations to approximate "startTime" and "endTime" in MM:SS, adding them sequentially so the entire video doesn't exceed 3 minutes.
-           - For example, if SCENE 1 has 20 seconds, it might be startTime="00:00", endTime="00:20".
+        1. Preserve the **sceneNumber** from the script. If the script says "SCENE 1 - 10 seconds", interpret that as sceneNumber = 1 and duration = 10 seconds.
+        2. Convert durations to approximate "startTime" and "endTime" in MM:SS, adding them sequentially so the entire video doesn't exceed {duration} seconds.
+           - For example, if SCENE 1 has 10 seconds, it might be startTime="00:00", endTime="00:10".
            - SCENE 2 (30 seconds) might be startTime="00:20", endTime="00:50", etc.
         3. Do not skip any scenes. Return them in the same order.
         4. If a scene references location or certain camera gear, place that info under the correct fields. 
@@ -211,6 +214,8 @@ export class SceneTechnicalExtractor {
         
         Script to parse:
         {script}
+
+        Duration: {duration} seconds
         
         Return only valid JSON array. No extra text or markdown.
         `),
@@ -465,18 +470,24 @@ export class SceneTechnicalExtractor {
     duration,
   }): Promise<string> {
     if (IS_DUMMY) return this.generateDummyScript();
+
+    const minScenes = Math.floor(duration / 10);
+    const maxScenes = Math.floor(duration / 5);
+    const meanScenes = Math.floor((minScenes + maxScenes) / 2);
+
     return await this.scriptChain.invoke({
       idea,
       title,
       lyrics,
       duration,
       tags: tags.join(", "),
+      meanScenes,
     });
   }
 
-  async extractScenes(script: string): Promise<object[]> {
+  async extractScenes(script: string, duration: number): Promise<object[]> {
     if (IS_DUMMY) return this.generateDummyScenes();
-    return await this.sceneChain.invoke({ script });
+    return await this.sceneChain.invoke({ script, duration });
   }
 
   async extractSettings(script: string): Promise<object[]> {
@@ -502,7 +513,7 @@ export class SceneTechnicalExtractor {
     characters: object[],
     settings: object[],
     script: string
-  ): Promise<object[]> {
+  ): Promise<Scene[]> {
     if (IS_DUMMY) return this.generateDummyPrompts();
     return await this.technicalTransformationChain.invoke({
       scenes: JSON.stringify(scenes),

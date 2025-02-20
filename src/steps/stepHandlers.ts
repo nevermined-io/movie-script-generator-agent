@@ -5,6 +5,7 @@ import {
 } from "@nevermined-io/payments";
 import { logMessage, logger } from "../logger/logger";
 import { SceneTechnicalExtractor } from "../sceneTechnicalExtractor";
+import { Scene } from "../types";
 
 /**
  * Processes incoming steps based on their type.
@@ -129,18 +130,38 @@ async function handleScriptGeneration(
   payments: Payments,
   extractor: SceneTechnicalExtractor
 ) {
-  let artifacts: any;
   try {
-    artifacts = JSON.parse(step.input_artifacts || "[]");
-    if (
-      !artifacts[0].title ||
-      !artifacts[0].tags ||
-      !artifacts[0].lyrics ||
-      !artifacts[0].idea ||
-      !artifacts[0].duration
-    ) {
-      throw new Error("Missing required song metadata");
-    }
+    const [{ title, tags, lyrics, idea, duration }] = JSON.parse(
+      step.input_artifacts
+    );
+    const script = await extractor.generateScript({
+      title,
+      tags,
+      lyrics,
+      idea,
+      duration,
+    });
+
+    logger.info(`Generated script: ${script}`);
+    await payments.query.updateStep(step.did, {
+      ...step,
+      step_status: AgentExecutionStatus.Completed,
+      output: "Script generation completed.",
+      output_artifacts: [
+        {
+          script,
+          lyrics,
+          tags,
+          duration,
+        },
+      ],
+    });
+
+    logMessage(payments, {
+      task_id: step.task_id,
+      level: "info",
+      message: `Script generation completed.`,
+    });
   } catch (error) {
     logger.error(`Error during script generation: ${error.message}`);
     await payments.query.updateStep(step.did, {
@@ -150,27 +171,6 @@ async function handleScriptGeneration(
     });
     return;
   }
-  const script = await extractor.generateScript(artifacts[0]);
-
-  logger.info(`Generated script: ${script}`);
-  await payments.query.updateStep(step.did, {
-    ...step,
-    step_status: AgentExecutionStatus.Completed,
-    output: "Script generation completed.",
-    output_artifacts: [
-      {
-        script,
-        lyrics: artifacts[0].lyrics,
-        tags: artifacts[0].tags,
-      },
-    ],
-  });
-
-  logMessage(payments, {
-    task_id: step.task_id,
-    level: "info",
-    message: `Script generation completed.`,
-  });
 }
 
 /**
@@ -182,8 +182,10 @@ async function handleScenesExtraction(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [{ script, lyrics, tags }] = JSON.parse(step.input_artifacts);
-    const scenes = await extractor.extractScenes(script);
+    const [{ script, lyrics, tags, duration }] = JSON.parse(
+      step.input_artifacts
+    );
+    const scenes = await extractor.extractScenes(script, duration);
 
     logger.info(`Extracted scenes: ${JSON.stringify(scenes)}`);
 
@@ -191,7 +193,7 @@ async function handleScenesExtraction(
       ...step,
       step_status: AgentExecutionStatus.Completed,
       output: "Scenes extraction completed.",
-      output_artifacts: [{ script, scenes, lyrics, tags }],
+      output_artifacts: [{ script, scenes, lyrics, tags, duration }],
     });
 
     logMessage(payments, {
@@ -229,14 +231,16 @@ async function handleSettingsGeneration(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [{ script, scenes, lyrics, tags }] = JSON.parse(step.input_artifacts);
+    const [{ script, scenes, lyrics, tags, duration }] = JSON.parse(
+      step.input_artifacts
+    );
     const settings = await extractor.extractSettings(script);
 
     await payments.query.updateStep(step.did, {
       ...step,
       step_status: AgentExecutionStatus.Completed,
       output: "Settings generation completed.",
-      output_artifacts: [{ script, scenes, settings, lyrics, tags }],
+      output_artifacts: [{ script, scenes, settings, lyrics, tags, duration }],
     });
   } catch (error) {
     logger.error(`Error during settings generation: ${error.message}`);
@@ -257,7 +261,7 @@ async function handleCharactersExtraction(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [{ script, scenes, settings, lyrics, tags }] = JSON.parse(
+    const [{ script, scenes, settings, lyrics, tags, duration }] = JSON.parse(
       step.input_artifacts
     );
     const characters = await extractor.extractCharacters(
@@ -272,7 +276,7 @@ async function handleCharactersExtraction(
       ...step,
       step_status: AgentExecutionStatus.Completed,
       output: "Characters extraction completed.",
-      output_artifacts: [{ script, settings, scenes, characters }],
+      output_artifacts: [{ script, settings, scenes, characters, duration }],
     });
 
     logMessage(payments, {
@@ -299,22 +303,22 @@ async function handleScenesTransformation(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [{ script, settings, scenes, characters }] = JSON.parse(
+    const [{ script, settings, scenes, characters, duration }] = JSON.parse(
       step.input_artifacts
     );
-    const transformedScenes = await extractor.transformScenes(
+    const prompts: Scene[] = await extractor.transformScenes(
       scenes,
       characters,
       settings,
       script
     );
-    logger.info(`Transformed scenes: ${JSON.stringify(transformedScenes)}`);
+    logger.info(`prompts: ${JSON.stringify(prompts)}`);
     logger.info("Sending data:");
     logger.info(
-      JSON.stringify([
-        { transformedScenes, settings, characters, script, scenes },
-      ])
+      JSON.stringify([{ prompts, settings, characters, script, scenes }])
     );
+
+    const transformedScenes = adjustSceneDurations(prompts, duration);
 
     await payments.query.updateStep(step.did, {
       ...step,
@@ -339,4 +343,44 @@ async function handleScenesTransformation(
       output: "Failed to transform scenes.",
     });
   }
+}
+
+function adjustSceneDurations(
+  scenes: Scene[],
+  targetDuration: number
+): Scene[] {
+  // Calculate the current total duration of all scenes
+  let currentSum = scenes.reduce((acc, scene) => acc + scene.duration, 0);
+
+  // While the current total is less than the target duration,
+  // randomly select a scene with a duration of 5 seconds and update it to 10 seconds.
+  while (currentSum < targetDuration) {
+    const candidates = scenes.filter((scene) => scene.duration === 5);
+    if (candidates.length === 0) {
+      console.warn("No scenes with duration 5 remain to increase.");
+      break;
+    }
+    // Randomly select a candidate
+    const randomIndex = Math.floor(Math.random() * candidates.length);
+    const selectedScene = candidates[randomIndex];
+    selectedScene.duration = 10;
+    currentSum += 5; // Increase the total duration by 5 seconds
+  }
+
+  // While the current total is greater than the target duration,
+  // randomly select a scene with a duration of 10 seconds and update it to 5 seconds.
+  while (currentSum > targetDuration + 5) {
+    const candidates = scenes.filter((scene) => scene.duration === 10);
+    if (candidates.length === 0) {
+      console.warn("No scenes with duration 10 remain to decrease.");
+      break;
+    }
+    // Randomly select a candidate
+    const randomIndex = Math.floor(Math.random() * candidates.length);
+    const selectedScene = candidates[randomIndex];
+    selectedScene.duration = 5;
+    currentSum -= 5; // Decrease the total duration by 5 seconds
+  }
+
+  return scenes;
 }
