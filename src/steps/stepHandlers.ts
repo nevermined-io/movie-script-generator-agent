@@ -357,7 +357,6 @@ function adjustSceneDurations(
   while (currentSum < targetDuration) {
     const candidates = scenes.filter((scene) => scene.duration === 5);
     if (candidates.length === 0) {
-      console.warn("No scenes with duration 5 remain to increase.");
       break;
     }
     // Randomly select a candidate
@@ -372,7 +371,6 @@ function adjustSceneDurations(
   while (currentSum > targetDuration + 5) {
     const candidates = scenes.filter((scene) => scene.duration === 10);
     if (candidates.length === 0) {
-      console.warn("No scenes with duration 10 remain to decrease.");
       break;
     }
     // Randomly select a candidate
