@@ -1,13 +1,11 @@
 import pino from "pino";
+import pretty from "pino-pretty";
 import { TaskLogMessage } from "@nevermined-io/payments";
 
 /**
  * Logger instance for structured logs.
  */
-export const logger = pino({
-  transport: { target: "pino-pretty" },
-  level: "info",
-});
+export const logger = pino(pretty({ sync: true }));
 
 /**
  * Logs a message both locally and remotely using the Nevermined Payments API.
