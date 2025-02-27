@@ -21,6 +21,28 @@ The **Music Video Technical Script Generator Agent** automates the process of cr
 All steps are **event-driven**, with tasks managed and billed through **Nevermined**. By subscribing to `step-updated` events, this agent listens for instructions and updates each step’s status as it progresses (e.g., from `Pending` to `Completed`).
 
 * * *
+**Related Projects**
+--------------------
+
+This **Video Generator Agent** is part of a larger ecosystem of AI-driven media creation. For a complete view of how multiple agents work together, see:
+
+1.  [Music Orchestrator Agent](https://github.com/nevermined-io/music-video-orchestrator)
+    
+    *   Coordinates end-to-end workflows: collects user prompts, splits them into tasks, pays agents in multiple tokens, merges final output.
+2.  [Song Generator Agent](https://github.com/nevermined-io/song-generation-agent)
+    
+    *   Produces lyrics, titles, and final audio tracks using LangChain + OpenAI and a chosen music generation API.
+3.  [Image / Video Generator Agent](https://github.com/nevermined-io/video-generator-agent)
+    
+    *   Produces Images / Video using 3rd party wrapper APIs (Fal.ai and TTapi, wrapping Flux and Kling.ai)
+
+**Workflow Example**:
+
+```
+[ User Prompt ] --> [Music Orchestrator] --> [Song Generation] --> [Script Generation] --> [Image/Video Generation] --> [Final Compilation]
+```
+
+* * *
 
 **Table of Contents**
 ---------------------
