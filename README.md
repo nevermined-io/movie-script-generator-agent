@@ -24,7 +24,7 @@ All steps are **event-driven**, with tasks managed and billed through **Nevermin
 **Related Projects**
 --------------------
 
-This **Video Generator Agent** is part of a larger ecosystem of AI-driven media creation. For a complete view of how multiple agents work together, see:
+This **Movie Script Generator Agent** is part of a larger ecosystem of AI-driven media creation. For a complete view of how multiple agents work together, see:
 
 1.  [Music Orchestrator Agent](https://github.com/nevermined-io/music-video-orchestrator)
     
