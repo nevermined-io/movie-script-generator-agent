@@ -118,7 +118,7 @@ async function handleInitStep(step: any, payments: Payments) {
     ...step,
     step_status: AgentExecutionStatus.Completed,
     output: step.input_query,
-    output_artifacts: [JSON.parse(step.input_artifacts)],
+    output_artifacts: [step.input_artifacts],
   });
 }
 
@@ -131,9 +131,7 @@ async function handleScriptGeneration(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [{ title, tags, lyrics, idea, duration }] = JSON.parse(
-      step.input_artifacts
-    );
+    const [{ title, tags, lyrics, idea, duration }] = step.input_artifacts;
     const script = await extractor.generateScript({
       title,
       tags,
@@ -182,9 +180,7 @@ async function handleScenesExtraction(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [{ script, lyrics, tags, duration }] = JSON.parse(
-      step.input_artifacts
-    );
+    const [{ script, lyrics, tags, duration }] = step.input_artifacts;
     const scenes = await extractor.extractScenes(script, duration);
 
     logger.info(`Extracted scenes: ${JSON.stringify(scenes)}`);
@@ -231,9 +227,7 @@ async function handleSettingsGeneration(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [{ script, scenes, lyrics, tags, duration }] = JSON.parse(
-      step.input_artifacts
-    );
+    const [{ script, scenes, lyrics, tags, duration }] = step.input_artifacts;
     const settings = await extractor.extractSettings(script);
 
     await payments.query.updateStep(step.did, {
@@ -261,9 +255,8 @@ async function handleCharactersExtraction(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [{ script, scenes, settings, lyrics, tags, duration }] = JSON.parse(
-      step.input_artifacts
-    );
+    const [{ script, scenes, settings, lyrics, tags, duration }] =
+      step.input_artifacts;
     const characters = await extractor.extractCharacters(
       step.input_query,
       lyrics,
@@ -303,9 +296,8 @@ async function handleScenesTransformation(
   extractor: SceneTechnicalExtractor
 ) {
   try {
-    const [{ script, settings, scenes, characters, duration }] = JSON.parse(
-      step.input_artifacts
-    );
+    const [{ script, settings, scenes, characters, duration }] =
+      step.input_artifacts;
     const prompts: Scene[] = await extractor.transformScenes(
       scenes,
       characters,
