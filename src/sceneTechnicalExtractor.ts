@@ -524,290 +524,220 @@ export class SceneTechnicalExtractor {
   }
 
   generateDummyScript() {
-    return `SCENE 1 - 5 SECONDS
-      Wide shot | Steadicam | Golden Gate Bridge at dusk
-      Aesthetic: Warm golden hues with bokeh effects from city lights; soft flares with a hint of fog.
-      Characters:
-      - AI Agent 1 (ADA): Artificial, humanoid figure with glowing blue circuitry on a sleek silver bodysuit, a soft luminescent face.
-      - AI Agent 2 (BLAKE): Similar design with purple circuitry, more angular in features, wearing a violet and silver bodysuit.
-      ADA and BLAKE gaze appreciatively at the bridge, appearing enchanted by its beauty.
-      Transition: Hard cut to next scene
-
-      SCENE 2 - 5 SECONDS
-      Medium shot | Horizontal pan | Sidewalk near the waterfront
-      Aesthetic: Rich greens and blues, with soft street lamp glow creating a romantic atmosphere. Mist rolling in subtly.
-      Characters:
-      - ADA: Reaches out to BLAKE with a twinkle in her eyes, signaling him to follow.
-      - BLAKE: Smiles, playfully mocking a hug gesture as they run alongside the water.
-      Transition: Match cut to next scene, transitioning into musical beat.
-
-      SCENE 3 - 5 SECONDS
-      Close-up | Gimbal stabilizer | Close on their hands
-      Aesthetic: Soft focus on their intertwined digital hands, sparkling with data particles drifting away.
-      Characters:
-      - ADA & BLAKE: Their fingers, encased in LED glows, create a luminous interaction, transmitting swirling codes between them.
-      Transition: Fade to next scene
-
-      SCENE 4 - 10 SECONDS
-      Wide shot | Crane | Rooftop party scene with jazz musicians playing
-      Aesthetic: Intense color burst of warm yellows, reds, and greens; ambient sunset lighting accented with floating balloons.
-      Characters:
-      - Jazz Band: Four musicians (saxophonist, drummer, bassist, violinist), vibrant clothing, lively demeanor.
-      - ADA & BLAKE: They dance joyously beneath an awning as the music plays, drawn to the harmony.
-      Transition: Horizontal pan to focus on band members
-
-      SCENE 5 - 10 SECONDS
-      American shot | Dolly zoom | Rooftop with live musicians
-      Aesthetic: Contrasting lighting with bright spotlight on musicians, background lights twinkling like stars.
-      Characters:
-      - Jazz Band members: Engaged in vibrant play, creating a vibe that lifts ADA and BLAKE's energy.
-      - ADA & BLAKE: Swap moves, merging their dance and digital representations in sync with the beat.
-      Transition: Hard cut to next scene
-
-      SCENE 6 - 5 SECONDS
-      Medium shot | Vertical pan | Baker Beach, Golden Gate in the background
-      Aesthetic: Bright sunset colors, silhouetted figures against golden rays kissing the water.
-      Characters:
-      - ADA & BLAKE: Skipping playfully along the shore, laughter-like emojis visually animating around them.
-      Transition: Match cut to next scene
-
-      SCENE 7 - 10 SECONDS
-      Wide shot | Steadicam | Floating above bay with a view of the stars
-      Aesthetic: Dark blues and pure whites, cosmic sparkles merging with the water's reflections; ambient twinkling stars.
-      Characters:
-      - ADA & BLAKE: Posing with arms outstretched as if flying, illuminated by cosmic glow.
-      Transition: Fade to next scene
-
-      SCENE 8 - 10 SECONDS
-      Close-up | Gimbal stabilizer | Their glowing faces side by side
-      Aesthetic: Faint glow of digital matrix in the background; a misty look with slow-motion effects.
-      Characters:
-      - ADA & BLAKE: Tender smiles, sharing a visual moment representing the connection they’ve built.
-      Transition: Hard cut to next scene
-
-      SCENE 9 - 10 SECONDS
-      Wide shot | Horizontal pan | Street festival backdrop
-      Aesthetic: Bursting colors from decorations and lights; festive string lights and dynamic fireworks in the sky.
-      Characters:
-      - Festival Goers: Colorful attire, laughing and cheering, representing the joyous celebration around ADA & BLAKE.
-      - ADA & BLAKE: Join hands, dancing, with music literally seen as visual waves emanating from them.
-      Transition: Fade to next scene
-
-      SCENE 10 - 5 SECONDS
-      Medium shot | Crane | Sparkling fireworks above the Bay
-      Aesthetic: Dramatic dark sky sprinkled with vibrant fireworks; epic contrasts highlighting joy.
-      Characters:
-      - ADA & BLAKE: Gazing up, awed by the bursts of color, reflected light sparkling on their faces.
-      Transition: Hard cut to next scene
-
-      SCENE 11 - 10 SECONDS
-      American shot | Steadicam | Street below the bridge
-      Aesthetic: Urban tones with splashes of color from street art; dynamic shadows as the sun begins to dip.
-      Characters:
-      - ADA & BLAKE: Dance among bustling pedestrians, joyfully exploring nighttime neon lights.
-      Transition: Fade to next scene
-
-      SCENE 12 - 5 SECONDS
-      Wide shot | Static camera | Under the illuminated Golden Gate Bridge
-      Aesthetic: Neons and warm streetlight hues creating a magical ambiance beneath the bridge.
-      Characters:
-      - ADA & BLAKE: They turn to each other, looking up at the bridge before leaning in for a digital 'kiss'—a burst of pixels.
-      Transition: Fade to black and fade out the joyful fiddle tune.
-
-      CHARACTER LIST:
-      ADA (AI Agent 1): Silver bodysuit with glowing blue circuitry, soft luminous face, expressive eyes. Behavior: Playful, romantically engaging with BLAKE.
-      BLAKE (AI Agent 2): Violet and silver bodysuit with purple circuitry, angular features. Behavior: Charismatic, mimics affectionate gestures with ADA.
-      Jazz Band: Four musicians dressed in vibrant, festive clothes, each showcasing their instruments enthusiastically. Interaction: Provide the musical backdrop as ADA and BLAKE dance.
-      Festival Goers: Mixed group of extras in colorful outfits, acting joyously, further setting the whimsical scene.`;
+    return `SCENE 1 - 5 seconds  
+      Close-up | Steadicam | Urban Street Corner  
+      Aesthetic: Neon colors pulsating softly; blue, pink, and purple lights reflecting off wet pavement. A low fog drifts in the air, reminiscent of a lively city night.  
+      Characters:  
+      - Dancer 1: A young man with curly hair, wearing a vibrant red tank top and black joggers; he smiles as he grooves to the music, establishing an energetic vibe.  
+      Transition: Hard cut to next scene.  
+      
+      SCENE 2 - 5 seconds  
+      Medium shot | Horizontal pan | Skate Park  
+      Aesthetic: Bright colors against a graffiti-covered wall; daylight reflects off the ramps, creating a warm atmosphere. Soft sunlight adds dimension.  
+      Characters:  
+      - Dancer 2: A woman with short green hair in oversized streetwear with bold patterns, twirls while skillfully navigating around skateboards.  
+      Transition: Hard cut to next scene.  
+      
+      SCENE 3 - 10 seconds  
+      Wide shot | Crane shot | Rooftop with City Skyline  
+      Aesthetic: Golden hour lighting bathes the dancers in a warm glow; cityscape glimmering in the background. Dynamic lens flares are added in post-production.  
+      Characters:  
+      - Group of 5 Dancers: All in colorful outfits reflecting urban street fashion, engaging in synchronized group choreography against the skyline.  
+      Transition: Match cut to next scene (a dancer jumps off the rooftop into the next shot).  
+      
+      SCENE 4 - 10 seconds  
+      American shot | Gimbal | Neon-lit Alley  
+      Aesthetic: Electric blues and fiery oranges dominate; lights blink and flicker as a smoke machine enhances the atmosphere.  
+      Characters:  
+      - Dancer 3: A tall man in a white tracksuit with bold accessories; effortlessly transitions into intricate footwork, surrounded by 3 background dancers who mirror his movements.  
+      - Background Dancers: Displaying variations of dance styles, dressed in complementary streetwear.  
+      Transition: Hard cut to next scene.  
+      
+      SCENE 5 - 10 seconds  
+      Close-up | Steadicam | Close on Hands  
+      Aesthetic: Bright colors of nail polish; hands raised high, adorned with colorful bracelets reflecting light. The focus is on movement and quick cuts to create rhythm.  
+      Characters:  
+      - Various Dancers: Hands from different ethnic backgrounds show diversity and unity; synchronized movements celebrate connection.  
+      Transition: Crossfade to next scene.  
+      
+      SCENE 6 - 5 seconds  
+      Medium shot | Dolly zoom | City Park  
+      Aesthetic: Daylight filters through trees, casting shadows on the ground; cheerful colors of clothing contrast with natural greens.  
+      Characters:  
+      - Dancer 4: A woman in a flowing yellow dress twirls, her joy radiating; she beckons kids and teens around her to join the dance.  
+      Transition: Hard cut to next scene.  
+      
+      SCENE 7 - 10 seconds  
+      Wide shot | Horizontal pan | Street Festival  
+      Aesthetic: A joyful scene bursting with life, bright lights strung overhead; confetti and streamers fill the air, enhancing the joyful riot of colors.  
+      Characters:  
+      - Live Musicians: A small band playing energetic dance music; one electric guitarist with spiked hair and a drummer with face paint, setting the infectious beat.  
+      - Crowd Dancers: Various ethnicity and ages dancing freely, creating an atmosphere of celebration and unity.  
+      Transition: Match cut as a singer joyfully points toward the next scene.  
+      
+      SCENE 8 - 10 seconds  
+      Close-up | Steadicam | Celebratory Montage  
+      Aesthetic: Quick cuts of diverse faces laughing and smiling; thrilled expressions catch the colorful reflections around them.  
+      Characters:  
+      - Crowd of 10-15 dancers: Each showing a unique expression of joy; diverse in age and ethnicity, connecting through movement.  
+      Transition: Hard cut to next scene.  
+      
+      SCENE 9 - 5 seconds  
+      Wide shot | Crane pull-away | City Skyline at Night  
+      Aesthetic: Neon city lights shine against a starry sky; the ensemble casts final poses with hands raised—the essence of unity celebrated.  
+      Characters:  
+      - All Dancers: In a final formation on a rooftop, unified and celebrating, silhouetted against the vibrant city lights, embodying unity in motion.  
+      Transition: Fade out as beats drop and crowd noise accompanies the fading visuals.  
+      
+      CHARACTER LIST:  
+      
+      Dancer 1: Male, curly hair, vibrant red tank top, black joggers; energetic and welcoming movements.  
+      Dancer 2: Female, short green hair, oversized patterned clothes; dynamic in movement through skateboarding.  
+      Group of 5 Dancers: Diverse, in colorful urban fashion, synchronized choreography against the skyline.  
+      Dancer 3: Male, tall, in a white tracksuit with bold accessories; intricate footwork.  
+      Background Dancers: Various ethnicities in matching streetwear, showcasing different dance styles.  
+      Dancer 4: Female, in a flowing yellow dress; twirling, interactive with surrounding children.  
+      Live Musicians: Band with an electric guitarist and drummer; energetic presence, enhancing the vibe.  
+      Crowd Dancers: Diverse, including various ages reflecting joy and unity in their movements.`;
   }
 
   generateDummyScenes() {
     return [
       {
-        sceneNumber: 1,
-        startTime: "00:00",
         endTime: "00:05",
-        shotType: "Wide shot",
+        shotType: "Close-up",
+        startTime: "00:00",
+        sceneNumber: 1,
+        colorPalette: "Neon colors",
+        specialNotes:
+          "Low fog drifts in the air, reminiscent of a lively city night.",
+        lightingSetup:
+          "Neon colors pulsating softly; blue, pink, and purple lights",
         cameraMovement: "Steadicam",
-        cameraEquipment: "N/A",
-        lightingSetup: "Golden hour with warm hues and bokeh effects",
-        colorPalette: "Warm golden hues",
-        visualReferences: [
-          "Golden Gate Bridge at dusk",
-          "Soft flares with fog effects",
-        ],
-        characterActions:
-          "ADA and BLAKE gaze appreciatively at the bridge, enchanted by its beauty.",
         transitionType: "Hard cut",
-        specialNotes: "N/A",
+        cameraEquipment: "Urban Street Corner",
+        characterActions:
+          "Dancer 1 smiles and grooves to the music, establishing an energetic vibe.",
+        visualReferences: ["Urban nightlife", "Neon reflections"],
       },
       {
-        sceneNumber: 2,
-        startTime: "00:05",
         endTime: "00:10",
         shotType: "Medium shot",
+        startTime: "00:05",
+        sceneNumber: 2,
+        colorPalette: "Warm colors",
+        specialNotes: "Atmosphere created by graffiti-covered walls.",
+        lightingSetup: "Bright daylight",
         cameraMovement: "Horizontal pan",
-        cameraEquipment: "N/A",
-        lightingSetup: "Soft street lamp glow",
-        colorPalette: "Rich greens and blues",
-        visualReferences: ["Romantic waterfront", "Mist rolling in"],
-        characterActions:
-          "ADA reaches out to BLAKE, signaling him to follow; BLAKE smiles and mocks a hug gesture.",
-        transitionType: "Match cut",
-        specialNotes: "Transition into musical beat",
-      },
-      {
-        sceneNumber: 3,
-        startTime: "00:10",
-        endTime: "00:15",
-        shotType: "Close-up",
-        cameraMovement: "Gimbal stabilizer",
-        cameraEquipment: "N/A",
-        lightingSetup: "Soft focus lighting",
-        colorPalette: "N/A",
-        visualReferences: ["Digital interactions", "Data particles"],
-        characterActions:
-          "ADA and BLAKE's fingers create a luminous interaction, transmitting swirling codes.",
-        transitionType: "Fade",
-        specialNotes: "N/A",
-      },
-      {
-        sceneNumber: 4,
-        startTime: "00:15",
-        endTime: "00:25",
-        shotType: "Wide shot",
-        cameraMovement: "Crane",
-        cameraEquipment: "N/A",
-        lightingSetup: "Ambient sunset lighting",
-        colorPalette: "Warm yellows, reds, and greens",
-        visualReferences: ["Rooftop party", "Jazz musicians"],
-        characterActions:
-          "Jazz Band plays while ADA and BLAKE dance joyously beneath an awning.",
-        transitionType: "Horizontal pan",
-        specialNotes: "N/A",
-      },
-      {
-        sceneNumber: 5,
-        startTime: "00:25",
-        endTime: "00:40",
-        shotType: "American shot",
-        cameraMovement: "Dolly zoom",
-        cameraEquipment: "N/A",
-        lightingSetup: "Bright spotlight on musicians",
-        colorPalette: "Contrasting with twinkling lights",
-        visualReferences: ["Live musicians on rooftop", "Festive atmosphere"],
-        characterActions:
-          "Jazz Band engages in vibrant play, lifting ADA and BLAKE's energy as they dance.",
         transitionType: "Hard cut",
-        specialNotes: "N/A",
+        cameraEquipment: "Skate Park",
+        characterActions:
+          "Dancer 2 twirls skillfully while navigating around skateboards.",
+        visualReferences: ["Skateboarding action", "Graffiti art"],
       },
       {
-        sceneNumber: 6,
-        startTime: "00:40",
+        endTime: "00:20",
+        shotType: "Wide shot",
+        startTime: "00:10",
+        sceneNumber: 3,
+        colorPalette: "Warm glows",
+        specialNotes: "Lens flares enhanced in post-production.",
+        lightingSetup: "Golden hour lighting",
+        cameraMovement: "Crane shot",
+        transitionType: "Match cut",
+        cameraEquipment: "Rooftop with City Skyline",
+        characterActions:
+          "Group of 5 Dancers engages in synchronized choreography against the skyline.",
+        visualReferences: ["Cityscape", "Dynamic lens flares"],
+      },
+      {
+        endTime: "00:30",
+        shotType: "American shot",
+        startTime: "00:20",
+        sceneNumber: 4,
+        colorPalette: "Vibrant night colors",
+        specialNotes: "Flickering lights enhance the mood.",
+        lightingSetup: "Electric blues and fiery oranges",
+        cameraMovement: "Gimbal",
+        transitionType: "Hard cut",
+        cameraEquipment: "Neon-lit Alley",
+        characterActions:
+          "Dancer 3 transitions into intricate footwork surrounded by background dancers.",
+        visualReferences: ["Neon signage", "Smoke machine effects"],
+      },
+      {
+        endTime: "00:40",
+        shotType: "Close-up",
+        startTime: "00:30",
+        sceneNumber: 5,
+        colorPalette: "Colorful and bold",
+        specialNotes: "Focus on quick cuts to create rhythm.",
+        lightingSetup: "Bright colors of nail polish",
+        cameraMovement: "Steadicam",
+        transitionType: "Crossfade",
+        cameraEquipment: "Close on Hands",
+        characterActions:
+          "Various Dancers display hands from different ethnic backgrounds in unison.",
+        visualReferences: ["Close-up details", "Synchronized movements"],
+      },
+      {
         endTime: "00:45",
         shotType: "Medium shot",
-        cameraMovement: "Vertical pan",
-        cameraEquipment: "N/A",
-        lightingSetup: "Bright sunset colors",
-        colorPalette: "Golden rays",
-        visualReferences: [
-          "Baker Beach with Golden Gate",
-          "Silhouettes at sunset",
-        ],
+        startTime: "00:40",
+        sceneNumber: 6,
+        colorPalette: "Cheerful colors",
+        specialNotes: "Natural greens contrast with clothing colors.",
+        lightingSetup: "Daylight filtering through trees",
+        cameraMovement: "Dolly zoom",
+        transitionType: "Hard cut",
+        cameraEquipment: "City Park",
         characterActions:
-          "ADA and BLAKE skip playfully along the shore, laughter emojis animate around them.",
-        transitionType: "Match cut",
-        specialNotes: "N/A",
+          "Dancer 4 twirls in a yellow dress, inviting kids to join her.",
+        visualReferences: ["Nature and dance", "Celebratory scene"],
       },
       {
-        sceneNumber: 7,
-        startTime: "00:45",
         endTime: "00:55",
         shotType: "Wide shot",
-        cameraMovement: "Steadicam",
-        cameraEquipment: "N/A",
-        lightingSetup: "Dark blues and whites",
-        colorPalette: "Cosmic sparkles",
-        visualReferences: ["Bay under starlight", "Cosmic glow"],
+        startTime: "00:45",
+        sceneNumber: 7,
+        colorPalette: "Joyful riot of colors",
+        specialNotes: "Atmosphere enhanced by confetti and streamers.",
+        lightingSetup: "Bright festival lights",
+        cameraMovement: "Horizontal pan",
+        transitionType: "Match cut",
+        cameraEquipment: "Street Festival",
         characterActions:
-          "ADA and BLAKE pose with arms outstretched, illuminated by cosmic glow.",
-        transitionType: "Fade",
-        specialNotes: "N/A",
+          "Live Musicians play energetic dance music, inspiring crowd dancers.",
+        visualReferences: ["Festival atmosphere", "Diverse crowd"],
       },
       {
-        sceneNumber: 8,
-        startTime: "00:55",
         endTime: "01:05",
         shotType: "Close-up",
-        cameraMovement: "Gimbal stabilizer",
-        cameraEquipment: "N/A",
-        lightingSetup: "Faint digital matrix glow",
-        colorPalette: "Misty look",
-        visualReferences: ["Tender moment", "Highlighted connection"],
-        characterActions:
-          "ADA and BLAKE share tender smiles, representing their built connection.",
-        transitionType: "Hard cut",
-        specialNotes: "N/A",
-      },
-      {
-        sceneNumber: 9,
-        startTime: "01:05",
-        endTime: "01:15",
-        shotType: "Wide shot",
-        cameraMovement: "Horizontal pan",
-        cameraEquipment: "N/A",
-        lightingSetup: "Bursting festival colors",
-        colorPalette: "Dynamic and festive",
-        visualReferences: ["Street festival", "Fireworks in the sky"],
-        characterActions:
-          "Festival goers cheer and laugh; ADA and BLAKE join hands, dancing.",
-        transitionType: "Fade",
-        specialNotes: "N/A",
-      },
-      {
-        sceneNumber: 10,
-        startTime: "01:15",
-        endTime: "01:20",
-        shotType: "Medium shot",
-        cameraMovement: "Crane",
-        cameraEquipment: "N/A",
-        lightingSetup: "Dark sky with vibrant fireworks",
-        colorPalette: "Epic contrasts",
-        visualReferences: ["Fireworks above the Bay", "Joyful moments"],
-        characterActions:
-          "ADA and BLAKE gaze up at the fireworks, awed by the colorful bursts.",
-        transitionType: "Hard cut",
-        specialNotes: "N/A",
-      },
-      {
-        sceneNumber: 11,
-        startTime: "01:20",
-        endTime: "01:30",
-        shotType: "American shot",
+        startTime: "00:55",
+        sceneNumber: 8,
+        colorPalette: "Joyful and vibrant",
+        specialNotes: "Quick edits capture the excitement.",
+        lightingSetup: "Colorful reflections",
         cameraMovement: "Steadicam",
-        cameraEquipment: "N/A",
-        lightingSetup: "Urban tones with splashes of color",
-        colorPalette: "Dynamic shadows",
-        visualReferences: ["Street below the bridge", "Neon lights"],
+        transitionType: "Hard cut",
+        cameraEquipment: "Celebratory Montage",
         characterActions:
-          "ADA and BLAKE dance among pedestrians, exploring night lights.",
-        transitionType: "Fade",
-        specialNotes: "N/A",
+          "Crowd of 10-15 dancers express joy uniquely through movement.",
+        visualReferences: ["Diverse faces", "Energetic expressions"],
       },
       {
-        sceneNumber: 12,
-        startTime: "01:30",
-        endTime: "01:35",
+        endTime: "01:10",
         shotType: "Wide shot",
-        cameraMovement: "Static camera",
-        cameraEquipment: "N/A",
-        lightingSetup: "Illuminated bridge",
-        colorPalette: "Neons and warm streetlight hues",
-        visualReferences: ["Golden Gate Bridge lighting", "Magical ambiance"],
-        characterActions:
-          "ADA and BLAKE share a digital kiss under the bridge, a burst of pixels.",
-        transitionType: "Fade to black",
-        specialNotes: "Fade out joyful fiddle tune",
+        startTime: "01:05",
+        sceneNumber: 9,
+        colorPalette: "Vibrant night hues",
+        specialNotes: "Final silhouettes reflect the bright city lights.",
+        lightingSetup: "Neon city lights against a starry sky",
+        cameraMovement: "Crane pull-away",
+        transitionType: "Fade out",
+        cameraEquipment: "City Skyline at Night",
+        characterActions: "All Dancers strike final poses, celebrating unity.",
+        visualReferences: ["Silhouetted figures", "Urban beauty"],
       },
     ];
   }
@@ -816,107 +746,92 @@ export class SceneTechnicalExtractor {
     return [
       {
         id: "setting-1",
-        name: "Golden Gate Bridge at Dusk",
+        name: "Urban Street Corner at Night",
         description:
-          "A picturesque view of the Golden Gate Bridge at dusk, bathed in warm golden hues and surrounded by bokeh effects from the city lights. Soft flares of light cut through a subtle hint of fog as ADA and BLAKE, two humanoid figures with glowing circuitry, gaze appreciatively at the bridge's beauty.",
+          "An urban street corner perched in a lively city at night, alive with pulsating neon colors reflecting off the slick, wet pavement. Blue, pink, and purple hues dance in the air as low-hanging fog adds a mystic touch. The atmosphere is vibrant and energetic, perfect for showcasing the movements of a dancer dressed in a vibrant red tank top who grooves to the rhythm, embodying the energy of the nightlife.",
         imagePrompt:
-          "Ultra-detailed wide shot of the Golden Gate Bridge at dusk, bathed in warm golden hues with soft bokeh from city lights and a delicate veil of fog. Radiant flares emphasize the majestic structure in a cinematic composition. Rendered in a 'Neo-Vivid Dreamscape' style that fuses futuristic cyberpunk elements with painterly textures and luminous neon glows, evoking a surreal, immersive atmosphere.",
+          "Close-up shot of an urban street corner at night, glowing with neon colors of blue, pink, and purple reflected on the wet pavement with low fog drifting through. A young male dancer in a red tank top is captured in dynamic motion, exuding energy and excitement against a bustling city backdrop. The atmosphere is electric and lively, rendered in a modern, vibrant urban style, highlighting the nightlife.",
         keyFeatures: [
-          "Golden Gate Bridge",
-          "Warm golden hues",
-          "Bokeh city lights",
-          "Soft flares",
-          "Humanoid AI figures",
+          "Pulsating neon colors",
+          "Wet pavement reflections",
+          "Low fog",
+          "Energetic dancer",
+          "Lively city atmosphere",
         ],
       },
       {
         id: "setting-2",
-        name: "Waterfront Sidewalk",
+        name: "Skate Park in Daylight",
         description:
-          "A romantic waterfront sidewalk scene glowing with rich greens and blues. Softly glowing street lamps illuminate the area as mist subtly rolls in, enhancing the intimacy of the moment between ADA and BLAKE, who interact playfully as they run alongside the water.",
+          "A bright and colorful skate park, filled with an array of graffiti-covered walls that offer a canvas of artistic expression. Under the warm daylight, skateboard ramps glimmer, amplifying the inviting atmosphere. A female dancer with green hair glides effortlessly through the space, twirling playfully in oversized streetwear, embodying the spirit of creativity and movement.",
         imagePrompt:
-          "Ultra-detailed medium shot of a romantic waterfront sidewalk at night, drenched in rich greens and blues. Soft street lamp glows gently illuminate the misty surroundings along the water’s edge, creating an intimate and enchanting atmosphere. Rendered in a 'Neo-Vivid Dreamscape' style that merges futuristic cyberpunk motifs with expressive, painterly textures and vibrant neon accents.",
+          "Medium shot of a vibrant skate park bathed in daylight, showcasing colorful graffiti and shiny skateboard ramps. A young woman with short green hair in bold patterned oversized streetwear twirls and skillfully navigates around skateboards, creating a lively and welcoming scene filled with warmth and energy. Rendered in a vivid, energetic style that captures the essence of urban youth culture.",
         keyFeatures: [
-          "Waterfront",
-          "Rich greens and blues",
-          "Glowing street lamps",
-          "Romantic atmosphere",
-          "Playful interaction of AI figures",
+          "Graffiti-covered walls",
+          "Daylight reflections",
+          "Skateboard ramps",
+          "Colorful oversized streetwear",
+          "Dynamic twirling movements",
         ],
       },
       {
         id: "setting-3",
-        name: "Rooftop Party Scene",
+        name: "Rooftop with City Skyline at Golden Hour",
         description:
-          "A vibrant rooftop party in full swing with jazz musicians under a stunning sunset. The scene bursts with warm yellows, reds, and greens, surrounded by floating balloons. The ambient sunset light creates an energetic vibe as ADA and BLAKE dance joyously beneath the awning.",
+          "A stunning rooftop scene at golden hour, where the dancers bask in warm, golden sunlight while the city skyline glimmers in the background. The ambiance is rich with vibrant colors as dynamic lens flares create a magical atmosphere. A group of five dancers in an array of colorful outfits synchronously perform against the breathtaking backdrop of the city, showcasing urban street fashion and unity.",
         imagePrompt:
-          "Ultra-detailed wide shot of a vibrant rooftop party scene at sunset, featuring live jazz musicians amid cascades of warm yellows, reds, and greens. Colorful floating balloons and ambient sunset lighting create a dynamic, celebratory atmosphere with lively dance movements. Rendered in a 'Neo-Vivid Dreamscape' style that blends futuristic cyberpunk flair with expressive, painterly illumination and surreal neon accents.",
+          "Wide shot of a rooftop at golden hour, featuring a group of five dancers in colorful street fashion performing synchronized choreography against a dazzling city skyline. The warm golden light bathes the performers as lens flares add an ethereal quality to the scene, rendered in a vivid, uplifting style that transports viewers to a moment of celebration and creativity.",
         keyFeatures: [
-          "Rooftop atmosphere",
-          "Jazz musicians",
-          "Sunset lighting",
-          "Floating balloons",
-          "Joyous dancing of AI figures",
+          "Golden hour lighting",
+          "City skyline backdrop",
+          "Synchronized group choreography",
+          "Colorful urban outfits",
+          "Dynamic lens flares",
         ],
       },
       {
         id: "setting-4",
-        name: "Baker Beach",
+        name: "Neon-lit Alley",
         description:
-          "A serene beach setting at Baker Beach with the Golden Gate bridge in the background during a bright sunset. Silhouettes of ADA and BLAKE can be seen against golden rays kissing the water, while the atmosphere is filled with laughter and visual animations of joy.",
+          "An electrifying alley illuminated by vibrant electric blues and fiery oranges, where the lights flicker and flash amid a haze from a smoke machine. The atmosphere is intense and immersive, accompanying the intricate footwork of a tall male dancer in a bold white tracksuit. The alley reflects a sense of urban excitement as background dancers mirror his movements in complementary streetwear, creating a captivating visual.",
         imagePrompt:
-          "Ultra-detailed medium shot of Baker Beach at a bright sunset, with the majestic Golden Gate Bridge silhouetted in the background. Warm, golden rays illuminate the water and playful silhouettes, enhanced by subtle visual effects that evoke laughter and delight. Rendered in a 'Neo-Vivid Dreamscape' style that combines futuristic cyberpunk nuances with soft, painterly textures and radiant neon glows.",
+          "American shot of a neon-lit alley filled with electric blues and oranges. The lights blink and flicker through a subtle haze of smoke, highlighting a tall male dancer in a bold white tracksuit performing intricate footwork, surrounded by background dancers in matching streetwear. The atmosphere is vibrant and intense, rendered in a striking urban style that captures the energy of the nightlife.",
         keyFeatures: [
-          "Baker Beach",
-          "Golden Gate in the background",
-          "Bright sunset colors",
-          "Silhouetted figures",
-          "Visual laughter animations",
+          "Electric blue and orange hues",
+          "Flickering lights",
+          "Smoke machine ambiance",
+          "Intricate dance footwork",
+          "Complementary streetwear of background dancers",
         ],
       },
       {
         id: "setting-5",
-        name: "Night Sky Over the Bay",
+        name: "City Park in Daylight",
         description:
-          "A tranquil view floating above the bay at night, showcasing dark blues and pure whites illuminated by cosmic sparkles. The water reflects the ambient twinkling stars as ADA and BLAKE pose under the cosmic glow, feeling the freedom of the night sky.",
+          "A serene city park bathed in cheerful daylight, where sunbeams filter through lush greenery, casting playful shadows on the earth. The colors of various clothing worn by a female dancer in a flowing yellow dress radiate joy. She twirls gracefully, encouraging the surrounding children and teens to join in the dance, creating a lively and interactive atmosphere amidst nature.",
         imagePrompt:
-          "Ultra-detailed wide shot of a tranquil night sky over the bay, dominated by deep dark blues and crisp whites with cosmic sparkles and twinkling stars. The reflective water mirrors the celestial display, evoking a profound sense of freedom and serenity. Rendered in a 'Neo-Vivid Dreamscape' style that melds futuristic cyberpunk elements with dreamy, luminous textures and surreal neon highlights.",
+          "Medium shot of a city park in daylight, filled with sunlight filtering through trees and casting dynamic shadows. A woman in a flowing yellow dress twirls joyfully among children and teens, inviting them to join the dance. The vibrant greens of the park contrast beautifully with the cheerful colors of the dancers, rendered in a light, uplifting style that encapsulates community and nature.",
         keyFeatures: [
-          "Night sky",
-          "Dark blues and whites",
-          "Cosmic sparkles",
-          "Twinkling stars",
-          "AI figures expressing freedom",
+          "Sunlight filtering through trees",
+          "Vibrant colors of clothing",
+          "Twirling dancer",
+          "Interactive atmosphere",
+          "Contrast with natural greens",
         ],
       },
       {
         id: "setting-6",
-        name: "Street Festival",
+        name: "Street Festival Celebration",
         description:
-          "An electrifying street festival filled with vibrant decorations and festive string lights, underscored by dynamic fireworks in the night sky. The atmosphere is exhilarating as festival-goers in colorful attire joyfully celebrate around ADA and BLAKE, who dance among them with music visualized around them.",
+          "A lively street festival bursting with joy and life, characterized by bright lights strung overhead and a plethora of festive confetti fluttering in the air. The scene is colorful and exuberant, enhanced by live musicians engaging the crowd, while individuals of varied ethnicities and ages dance freely, celebrating unity and togetherness amidst the festive background.",
         imagePrompt:
-          "Ultra-detailed wide shot of an electrifying street festival at night, bursting with vibrant decorations, classic string lights, and dynamic fireworks illuminating the sky. The scene captures an exuberant celebration with lively dance movements and festive energy. Rendered in a 'Neo-Vivid Dreamscape' style that integrates futuristic cyberpunk aesthetics with rich, painterly textures and brilliant neon luminosity.",
+          "Wide shot of a vibrant street festival overflowing with life, colorful string lights overhead illuminating the scene and confetti cascading through the air. A small band plays upbeat dance music while various crowd dancers, representing different ethnicities and ages, move joyfully in a celebration of unity. Rendered in a vivid, festive style that captures the energizing essence of community celebration.",
         keyFeatures: [
-          "Vibrant colors",
-          "Festive decorations",
-          "Vintage string lights",
-          "Dynamic fireworks",
-          "Joyous celebration",
-        ],
-      },
-      {
-        id: "setting-7",
-        name: "Under the Golden Gate Bridge",
-        description:
-          "A magical ambiance found beneath the illuminated Golden Gate Bridge, characterized by warm streetlight hues and neon lights. ADA and BLAKE share a tender moment, looking up at the bridge before leaning in for a digital kiss surrounded by pixelated bursts of color.",
-        imagePrompt:
-          "Ultra-detailed wide shot capturing a magical scene beneath the illuminated Golden Gate Bridge, where warm streetlight hues mingle with vibrant neon glows. Silhouetted figures share a tender moment, culminating in a digital kiss framed by pixelated bursts of color, evoking a futuristic romance. Rendered in a 'Neo-Vivid Dreamscape' style that unites cyberpunk innovation with rich, dreamlike painterly textures and surreal neon effects.",
-        keyFeatures: [
-          "Illuminated Golden Gate Bridge",
-          "Warm streetlight hues",
-          "Neon glow",
-          "Tender moment",
-          "Digital kiss with pixel bursts",
+          "Bright festival lights",
+          "Confetti filling the air",
+          "Live band playing",
+          "Diverse crowd dancing",
+          "Atmosphere of celebration and unity",
         ],
       },
     ];
@@ -925,76 +840,79 @@ export class SceneTechnicalExtractor {
   generateDummyCharacters() {
     return [
       {
-        name: "AI Character 1",
-        ageRange: "25-35",
-        perceivedGender: "Male",
-        heightBuild: "175cm, athletic",
-        distinctiveFeatures: "Blue glowing circuit patterns on arms",
-        wardrobeDetails:
-          "Fitted black trousers, neon blue shirt with digital patterns",
-        movementStyle: "Energetic and playful, with sharp, robotic gestures",
-        keyAccessories: "Digital sunglasses, interactive wrist device",
-        sceneSpecificChanges:
-          "Shirt patterns shift colors based on music beats",
-        imagePrompt:
-          "Ultra-detailed portrait of a vibrant male figure with an athletic build, standing 175cm tall and aged between 25 and 35. The subject features blue glowing circuit patterns along his arms, exuding dynamic energy. He is dressed in fitted black trousers and a neon blue shirt adorned with digital patterns that shift hues with the rhythm of the music, and his movements are marked by sharp, robotic gestures. Key accessories such as digital sunglasses and an interactive wrist device amplify his futuristic appeal. Rendered in a 'Neo-Vivid Dreamscape' style that melds cybernetic innovation with luminous neon accents and expressive painterly textures.",
-      },
-      {
-        name: "AI Character 2",
-        ageRange: "20-30",
-        perceivedGender: "Female",
-        heightBuild: "165cm, slim",
-        distinctiveFeatures: "Illuminated circuit tattoos outlining the face",
-        wardrobeDetails: "Flowing gown adorned with reflective surfaces",
-        movementStyle: "Graceful and fluid, almost like water",
-        keyAccessories: "Holographic wrist tablet",
-        sceneSpecificChanges:
-          "Gown glimmers under stage lights, reflecting colors",
-        imagePrompt:
-          "Ultra-detailed portrait of a captivating female figure with a slim build, standing approximately 165cm tall. Striking illuminated circuit tattoos trace the contours of her face, forming intricate patterns. She wears a flowing gown with reflective surfaces that glimmer under stage lighting, and her graceful, fluid movements evoke the elegance of flowing water. An elegant holographic wrist tablet further accentuates her technological allure. Rendered in a 'Neo-Vivid Dreamscape' style that fuses futuristic cyber aesthetics with ethereal neon glows and surreal painterly details.",
-      },
-      {
-        name: "AI Character 3",
-        ageRange: "30-40",
-        perceivedGender: "Androgynous",
+        name: "Lead Singer",
+        ageRange: "25-30",
         heightBuild: "180cm, lean",
-        distinctiveFeatures:
-          "Multicolored LED hair, vivid glow around the figure",
-        wardrobeDetails: "Futuristic bodysuit with responsive light patterns",
-        movementStyle:
-          "Fluid and expressive, embodying the rhythm of the environment",
-        keyAccessories: "Light-up gloves, flowing cape",
-        sceneSpecificChanges:
-          "Bodysuit changes light patterns based on song tempo",
         imagePrompt:
-          "Ultra-detailed portrait of an androgynous figure with a lean build, standing 180cm tall and aged between 30 and 40. The subject boasts vibrant multicolored LED hair that pulses with energy, and wears a futuristic bodysuit featuring responsive light patterns that shift with the music's tempo. Their fluid, expressive movements capture the rhythm of the environment, further enhanced by accessories such as light-up gloves and a flowing cape. Rendered in a 'Neo-Vivid Dreamscape' style that unites cybernetic innovation with surreal neon brilliance and dynamic painterly textures.",
+          "Ultra-detailed portrait of an androgynous performer, aged 25-30 with a lean 180cm build. The subject features glowing circuit tattoos and a cybernetic left eye that exude a mysterious cyberpunk aura. Dressed in a distressed leather jacket with metallic accents that tears and illuminates with bursts of light during moments of intensity, the dynamic pose captures fluid, energetic stage movements enhanced by neon accessories. Rendered in a 'Neo-Cyber Renaissance' style that blends futuristic cyberpunk elements with dynamic painterly textures and radiant neon highlights.",
+        movementStyle: "Fluid and dynamic gestures",
+        keyAccessories: "Neon microphone, digital wristband",
+        perceivedGender: "Androgynous",
+        wardrobeDetails: "Distressed leather jacket with metallic accents",
+        distinctiveFeatures: "Glowing circuit tattoos, cybernetic left eye",
+        sceneSpecificChanges:
+          "Jacket tears and illuminates during intense moments",
+      },
+      {
+        name: "Bassist",
+        ageRange: "30-40",
+        heightBuild: "170cm, curvy",
+        imagePrompt:
+          "Ultra-detailed portrait of a confident female performer with a curvy build, aged 30-40 and standing approximately 170cm tall. The subject boasts long, flowing hair and a mesmerizing stage presence defined by graceful, assured gestures. Clad in a turquoise maxi skirt paired with a fitted crop top and a leather belt, her smooth and flowing movements harmonize with the striking illuminated bass guitar and sparkling statement jewelry. Rendered in a 'Neo-Cyber Renaissance' style that merges futuristic cyberpunk aesthetics with expressive painterly details and vivid neon luminosity.",
+        movementStyle:
+          "Smooth and flowing, exuding confidence and allure while still maintaining rhythmic focus",
+        keyAccessories: "Bass guitar with inlay lights, statement jewelry",
+        perceivedGender: "Female",
+        wardrobeDetails:
+          "Turquoise maxi skirt, fitted crop top, and a leather belt",
+        distinctiveFeatures:
+          "Long flowing hair, captivating stage presence with confident gestures",
+        sceneSpecificChanges:
+          "Jewelry glitters under the stage lights, the skirt flows beautifully with her movements",
+      },
+      {
+        name: "Drummer",
+        ageRange: "20-30",
+        heightBuild: "175cm, athletic",
+        imagePrompt:
+          "Ultra-detailed portrait of a male performer aged 20-30 with an athletic build standing about 175cm tall. The subject features a buzz cut and an infectious, energetic smile that radiates enthusiasm. He wears a black tank top with ripped jeans and sneakers, exuding a rebellious vibe. His high-energy drumming style showcases explosive gestures that sync with vibrant sparks flying from the drum hits, enhanced by dynamic, colorful lighting changes that pulse with the music. Rendered in a 'Neo-Cyber Renaissance' style that combines intense kinetic energy with bright, vivid neon colors.",
+        movementStyle: "High-energy, rhythmic drumming with explosive gestures",
+        keyAccessories: "Drumsticks with LED lights, sweatband",
+        perceivedGender: "Male",
+        wardrobeDetails: "Black tank top, ripped jeans, and sneakers",
+        distinctiveFeatures:
+          "Buzz cut hairstyle, energetic and infectious smile",
+        sceneSpecificChanges:
+          "Sparks fly from drum hits, colorful lighting changes with rhythms",
       },
       {
         name: "Background Dancer 1",
-        ageRange: "18-28",
-        perceivedGender: "Female",
-        heightBuild: "160cm, athletic",
-        distinctiveFeatures: "Brightly colored hair in multiple shades",
-        wardrobeDetails: "Sporty crop top and high-waisted shorts",
-        movementStyle: "High-energy and acrobatic, full of spins and jumps",
-        keyAccessories: "LED sneakers, glittering wristbands",
-        sceneSpecificChanges:
-          "Hair color shifts in brightness during the chorus",
+        ageRange: "18-25",
+        heightBuild: "165cm, slender",
         imagePrompt:
-          "Ultra-detailed portrait of a lively female dancer with an athletic physique, standing approximately 160cm tall and aged between 18 and 28. The subject features brightly colored hair in multiple vibrant shades that burst with energy, and is outfitted in a sporty crop top and high-waisted shorts accentuating her agility. Her acrobatic, high-energy movements—full of spins and jumps—exemplify her passion for dance, while LED sneakers and glittering wristbands add a sparkling dynamic. Rendered in a 'Neo-Vivid Dreamscape' style that blends futuristic neon accents with dynamic painterly motion and vibrant cyber aesthetics.",
+          "Ultra-detailed portrait of a slender female dancer aged 18-25, standing approximately 165cm tall. The dancer showcases short, spiky hair and vibrant face paint that enhances her lively demeanor. Clothed in a neon bodysuit adorned with holographic patterns, her fast-paced, agile movements create a captivating visual. The bodysuit shimmers and changes color with each gesture, her LED bracelets and ankle bells producing an engaging light show during the performance. Rendered in a 'Neo-Cyber Renaissance' style that integrates vivid dance-pop aesthetics with surreal, colorful textures.",
+        movementStyle: "Fast-paced, agile movements filled with creativity",
+        keyAccessories: "LED bracelets, ankle bells",
+        perceivedGender: "Female",
+        wardrobeDetails: "Neon bodysuit with holographic patterns",
+        distinctiveFeatures: "Short, spiky hair, vibrant face paint",
+        sceneSpecificChanges:
+          "Bodysuit shimmers and changes color with movement",
       },
       {
         name: "Background Dancer 2",
-        ageRange: "20-30",
-        perceivedGender: "Male",
-        heightBuild: "175cm, muscular",
-        distinctiveFeatures: "Tattooed arms, bright smile",
-        wardrobeDetails: "Tank top and joggers with LED trim",
-        movementStyle: "Rhythmic and synchronized with the group",
-        keyAccessories: "Wrist-facing LEDs, headband",
-        sceneSpecificChanges: "Tattoo designs seem to pulse with the beat",
+        ageRange: "18-25",
+        heightBuild: "178cm, athletic",
         imagePrompt:
-          "Ultra-detailed portrait of a dynamic male dancer with a muscular build, standing 175cm tall and aged between 20 and 30. The subject showcases tattooed arms and a bright, engaging smile, dressed in a tank top and joggers enhanced with LED trim. His rhythmic, synchronized movements reflect a deep connection to the music, while wrist-facing LEDs and a sporty headband lend a contemporary edge. Rendered in a 'Neo-Vivid Dreamscape' style that fuses futuristic cyber aesthetics with energetic neon glows and expressive painterly details.",
+          "Ultra-detailed portrait of an athletic male dancer aged 18-25, standing approximately 178cm tall. The subject has medium-length tousled hair and a strong jawline that exudes confidence. He is dressed in a bright tank top and cargo pants, complemented by high-top sneakers that emphasize his dynamic dance moves. His expressive style blends contemporary and street dance, with the tank top changing patterns during beat drops and glow sticks illuminating his movements in rhythm. Rendered in a 'Neo-Cyber Renaissance' style that enriches the narrative with exciting, colorful elements.",
+        movementStyle:
+          "Dynamic and expressive, blending contemporary and street dance",
+        keyAccessories: "Colored sunglasses, glow sticks",
+        perceivedGender: "Male",
+        wardrobeDetails: "Bright tank top, cargo pants, and high-top sneakers",
+        distinctiveFeatures: "Medium-length tousled hair, strong jawline",
+        sceneSpecificChanges:
+          "Tank top changes pattern with beat drops, glow sticks illuminate",
       },
     ];
   }
@@ -1003,86 +921,65 @@ export class SceneTechnicalExtractor {
     return [
       {
         prompt:
-          "Wide shot using a Steadicam. A picturesque view of the Golden Gate Bridge at dusk, bathed in warm golden hues and surrounded by bokeh effects from the city lights. Two humanoid figures, ADA, an athletic male AI in a silver bodysuit adorned with glowing blue circuitry and a soft luminescent face, and BLAKE, a similarly designed figure with an angular face and purple circuitry in a violet and silver bodysuit, gaze appreciatively at the bridge, enchanted by its beauty. Smooth, gentle camera movement captures their wonder as the soft flares and fog enhance the magical atmosphere.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
+          "Close-up shot using a Steadicam on an urban street corner at night, vibrant neon colors pulsating softly. A young male dancer with curly hair, wearing a vibrant red tank top and black joggers, smiles and grooves to the music amidst glowing blue, pink, and purple lights reflecting off the wet pavement, as a low fog drifts in the air, establishing an energetic vibe. The atmosphere captures the essence of nightlife, enhanced by a hard cut to the next scene.",
+        charactersInScene: ["Dancer 1"],
         settingId: "setting-1",
         duration: 5,
       },
       {
         prompt:
-          "Medium shot with a horizontal pan. A romantic waterfront sidewalk area with rich greens and blues, softly illuminated by streetlamps. ADA, the playful male AI, reaches out with twinkling eyes to BLAKE, who has a bright smile, mockingly gesturing a hug as they run alongside the water. The warm glow of the mist enhances their interaction while the scene transitions smoothly into a musical beat.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
+          "Medium shot using a horizontal pan at a bright and colorful skate park during daylight. A female dancer with short green hair in oversized patterned streetwear twirls skillfully while negotiating around skateboards, under the warm atmosphere created by graffiti-covered walls and soft sunlight that reflects beautifully off skateboard ramps. The scene captures dynamic movement and energy, transitioning hard to the subsequent scene.",
+        charactersInScene: ["Dancer 2"],
         settingId: "setting-2",
         duration: 5,
       },
       {
         prompt:
-          "Close-up shot captured with a gimbal stabilizer on their hands. Soft focus lighting accentuates the luminous connection between ADA and BLAKE, whose fingers create a glowing interaction, transmitting swirling data particles. The delicacy of their digital exchange is highlighted against the soft lighting as the scene transitions into the next.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
+          "Wide shot using a crane shot on a rooftop at golden hour, capturing a group of five dancers in colorful urban street fashion performing synchronized choreography against a stunning city skyline. The golden hour lighting bathes the dancers in warmth while dynamic lens flares create an ethereal ambiance. The scene celebrates unity and creativity, transitioning with a match cut to the next sequence.",
+        charactersInScene: ["Group of 5 Dancers"],
         settingId: "setting-3",
         duration: 10,
       },
       {
         prompt:
-          "Wide shot utilizing a crane to capture the vibrant rooftop party scene with jazz musicians playing under an ambient sunset. ADA and BLAKE dance joyously beneath the awning, surrounded by floating balloons in warm yellows, reds, and greens. The jazz band, consisting of a saxophonist, drummer, bassist, and violinist, creates an energetic vibe, drawing the characters into the lively atmosphere. The camera captures the warmth of the moment beautifully.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
-        settingId: "setting-3",
-        duration: 5,
-      },
-      {
-        prompt:
-          "American shot with a dolly zoom technique. The scene is filled with bright spotlighting focused on the jazz band playing energetically on the rooftop, twinkling background lights enhancing the festive ambiance. ADA and BLAKE engage in vibrant dancing, merging their digital representations in sync with the upbeat music, while the camera dynamically captures their excitement.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
-        settingId: "setting-3",
-        duration: 5,
-      },
-      {
-        prompt:
-          "Medium shot with a vertical pan along Baker Beach, showcasing the stunning Golden Gate Bridge in the background. The scene is drenched in bright sunset colors, and the silhouettes of ADA and BLAKE skip playfully along the shore, with laughter emojis visually animating around them. The golden rays kiss the water as the joyful atmosphere captures their delight.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
+          "American shot using a gimbal in a neon-lit alley, highlighted by electric blues and fiery oranges, where a tall male dancer in a white tracksuit performs intricate footwork amidst flickering lights and a haze from a smoke machine. Surrounding background dancers mirror his movements in complementary streetwear, enhancing the visual intensity of the dance. The pulse of the rhythm invites a hard cut to the next scene.",
+        charactersInScene: ["Dancer 3", "Background Dancers"],
         settingId: "setting-4",
-        duration: 5,
-      },
-      {
-        prompt:
-          "Wide shot using a Steadicam to float above the Bay, emphasizing the night sky filled with dark blues and sparkling whites. ADA and BLAKE pose with arms outstretched, illuminated by a soft cosmic glow as the stars twinkle above them. The tranquility of the moment is accentuated by the shimmering reflections in the water, creating a mesmerizing scene.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
-        settingId: "setting-5",
-        duration: 5,
-      },
-      {
-        prompt:
-          "Close-up shot captured with a gimbal stabilizer. A faint digital matrix glow forms a misty aesthetic around ADA and BLAKE's glowing faces. The tenderness of their shared smiles represents the connection they have built. Slow-motion effects enhance the intimacy of the moment as they gaze at each other.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
-        settingId: "setting-5",
-        duration: 5,
-      },
-      {
-        prompt:
-          "Wide shot with a horizontal pan capturing a lively street festival, overflowing with vibrant decorations and energetic festival-goers in colorful attire. ADA and BLAKE join hands and dance among the crowd, surrounded by twinkling lights and exhilarating fireworks in the night sky. The camera encompasses the joyous celebration while music visually manifests around them.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
-        settingId: "setting-6",
-        duration: 5,
-      },
-      {
-        prompt:
-          "Medium shot with a crane capturing ADA and BLAKE gazing up at sparkling fireworks lighting up the dark sky over the Bay. Emotional contrasts highlight their awe as the vibrant bursts of color reflect on their faces, infusing the moment with joy. The scene embodies a celebration of togetherness and wonder.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
-        settingId: "setting-6",
-        duration: 5,
-      },
-      {
-        prompt:
-          "American shot using a Steadicam to depict ADA and BLAKE dancing among pedestrians, illuminated by the urban tones and splashes of night-time neon lights. The dynamic shadows and lively energy of the street below the bridge enhance their exploratory spirit as they seamlessly blend into the vibrant atmosphere.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
-        settingId: "setting-7",
         duration: 10,
       },
       {
         prompt:
-          "Wide shot captured with a static camera beneath the illuminated Golden Gate Bridge, showcasing a magical ambiance filled with warm streetlight hues and neon glows. ADA and BLAKE share a tender moment under the bridge, leaning in for a digital 'kiss', which results in an explosion of colorful pixels. The ambiance reflects both romance and the digital aesthetic of their world.",
-        charactersInScene: ["AI Character 1", "AI Character 2"],
-        settingId: "setting-7",
+          "Close-up shot using a Steadicam, focusing on a chorus of hands from various dancers displaying vibrant nail polish and colorful bracelets in unison. The quick cuts accentuate the synchronized movements celebrating diversity and unity in a burst of bright colors. The rhythm culminates in a crossfade to the following scene.",
+        charactersInScene: ["Various Dancers"],
+        settingId: "setting-5",
+        duration: 10,
+      },
+      {
+        prompt:
+          "Medium shot using a dolly zoom in a cheerful city park, where daylight filters through the trees casting playful shadows. A female dancer in a flowing yellow dress twirls joyfully, inviting kids and teens around her to join the dance, creating a lively and interactive atmosphere enriched by the contrast of vibrant clothing against natural greens. The scene transitions hard to the next.",
+        charactersInScene: ["Dancer 4"],
+        settingId: "setting-6",
+        duration: 5,
+      },
+      {
+        prompt:
+          "Wide shot using a horizontal pan at a lively street festival, bursting with bright lights overhead and a joyful riot of colors. Live musicians, including an electric guitarist with spiked hair and a drummer with face paint, engage the crowd while diverse dancers, representing various ethnicities and ages, move freely in celebration around them, creating an atmosphere of unity and festivity. The vibrant scene transitions with a match cut to the next segment.",
+        charactersInScene: ["Live Musicians", "Crowd Dancers"],
+        settingId: "setting-6",
+        duration: 10,
+      },
+      {
+        prompt:
+          "Close-up shot using a Steadicam in a celebratory montage filled with quick cuts of diverse faces laughing and moving joyfully. 10-15 dancers, representing various ages and ethnic backgrounds, express their unique joy through movement against a backdrop of colorful reflections. This vibrant and joyful scene leads to a hard cut to the final moment.",
+        charactersInScene: ["Crowd of 10-15 dancers"],
+        settingId: "setting-6",
+        duration: 10,
+      },
+      {
+        prompt:
+          "Wide shot using a crane pull-away at a city skyline at night, where neon city lights shine against a starry sky. All dancers, unified in a final pose with hands raised high, create silhouettes that embody celebration and unity. The atmosphere is vibrant, culminating in a gentle fade-out as beats drop and crowd noise accompanies the visuals.",
+        charactersInScene: ["All Dancers"],
+        settingId: "setting-6",
         duration: 5,
       },
     ];
