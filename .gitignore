@@ -5,3 +5,6 @@ node_modules
 package-lock.json
 dist
 .DS_Store
+
+src/logs/*
+src/data/*

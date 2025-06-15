@@ -6,8 +6,62 @@ import {
   JsonOutputParser,
   StringOutputParser,
 } from "@langchain/core/output_parsers";
-import { IS_DUMMY } from "./config/env";
+import { IS_DUMMY, HELICONE_API_KEY } from "./config/env";
 import { Scene } from "./types";
+import { v4 as uuidv4 } from "uuid";
+import * as fs from "fs";
+import * as path from "path";
+import * as crypto from "crypto";
+
+// Generate deterministic agent ID based on class name
+const generateDeterministicAgentId = (className: string): string => {
+  const hash = crypto.createHash('sha256').update(className).digest('hex').substring(0, 32);
+  // Format as UUID: 8-4-4-4-12
+  return `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}-${hash.substring(16, 20)}-${hash.substring(20, 32)}`;
+};
+
+// Generate random session ID
+const generateSessionId = (): string => {
+  return uuidv4();
+};
+
+// Log session information
+const logSessionInfo = (agentId: string, sessionId: string, agentName: string = 'SceneTechnicalExtractor'): void => {
+  const timestamp = new Date().toISOString();
+  const logsDir = path.join(__dirname, 'logs');
+  
+  // Ensure logs directory exists
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+  
+  // Create session-specific log file with timestamp format (YYYYMMDD_HHMMSS)
+  const now = new Date();
+  const timestampStr = now.toISOString()
+    .replace(/[-:]/g, '')  // Remove dashes and colons
+    .replace(/T/, '_')     // Replace T with underscore
+    .substring(0, 15);     // Take YYYYMMDD_HHMMSS format
+  
+  const sessionLogFile = path.join(logsDir, `session_${timestampStr}.txt`);
+  
+  // Check if session file already exists to avoid duplicating session ID
+  let sessionExists = false;
+  if (fs.existsSync(sessionLogFile)) {
+    sessionExists = true;
+  }
+  
+  // If session file doesn't exist, create it with session ID header
+  if (!sessionExists) {
+    const sessionHeader = `Session ID: ${sessionId}\n`;
+    fs.writeFileSync(sessionLogFile, sessionHeader);
+  }
+  
+  // Append agent information in the expected format
+  const agentEntry = `${agentName}: ${agentId}\n`;
+  fs.appendFileSync(sessionLogFile, agentEntry);
+  
+  console.log(`Session logged: Timestamp: ${timestamp}, Agent Name: ${agentName}, Agent ID: ${agentId}, Session ID: ${sessionId}`);
+};
 
 /**
  * A custom Runnable to extract pure JSON from an LLM response (AIMessage), ignoring
@@ -63,6 +117,9 @@ function extractStringFromMessageContent(inputContent: string | any[]): string {
  * Class combining script generation and scenes extraction.
  */
 export class SceneTechnicalExtractor {
+  private readonly agentId: string;
+  private readonly sessionId: string;
+  
   private scriptChain: RunnableSequence<
     {
       idea: string;
@@ -92,7 +149,25 @@ export class SceneTechnicalExtractor {
   >;
 
   constructor(apiKey: string) {
-    const llm = new ChatOpenAI({ model: "gpt-4o-mini", apiKey });
+    // Generate deterministic agent ID and random session ID
+    this.agentId = generateDeterministicAgentId('SceneTechnicalExtractor');
+    this.sessionId = generateSessionId();
+    
+    // Log session information
+    logSessionInfo(this.agentId, this.sessionId, 'SceneTechnicalExtractor');
+    
+    const llm = new ChatOpenAI({
+      model: "gpt-4o-mini",
+      apiKey,
+      configuration: {
+        baseURL: "https://oai.helicone.ai/v1",
+        defaultHeaders: {
+          "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
+          "Helicone-Property-AgentId": this.agentId,
+          "Helicone-Property-SessionId": this.sessionId,
+        }
+      }
+    });
 
     this.scriptChain = RunnableSequence.from([
       ChatPromptTemplate.fromTemplate(`
@@ -130,7 +205,7 @@ export class SceneTechnicalExtractor {
         
         5. **Include Scenes with Live Musicians**:
            - At least two scenes must feature a visible band or musicians playing instruments that complement the main story.
-           - Show how these musicians integrate into the video’s narrative or setting.
+           - Show how these musicians integrate into the video's narrative or setting.
         
         **Output Format**:  
         
@@ -268,7 +343,7 @@ export class SceneTechnicalExtractor {
             description:
               "A romantic waterfront sidewalk scene glowing with rich greens and blues. Softly glowing street lamps illuminate the area as mist subtly rolls in, enhancing the intimacy of the moment between ADA and BLAKE, who interact playfully as they run alongside the water.",
             imagePrompt:
-              "Ultra-detailed medium shot of a romantic waterfront sidewalk at night, drenched in rich greens and blues. Soft street lamp glows gently illuminate the misty surroundings along the water’s edge, creating an intimate and enchanting atmosphere. Rendered in a 'Neo-Vivid Dreamscape' style that merges futuristic cyberpunk motifs with expressive, painterly textures and vibrant neon accents.",
+              "Ultra-detailed medium shot of a romantic waterfront sidewalk at night, drenched in rich greens and blues. Soft street lamp glows gently illuminate the misty surroundings along the water's edge, creating an intimate and enchanting atmosphere. Rendered in a 'Neo-Vivid Dreamscape' style that merges futuristic cyberpunk motifs with expressive, painterly textures and vibrant neon accents.",
             keyFeatures: [
               "Waterfront",
               "Rich greens and blues",
@@ -322,7 +397,7 @@ export class SceneTechnicalExtractor {
         Include every character mentioned in the script, not only the musicians. If there are characters that are part of the narrative (such as background dancers, story characters, or extras), they must all appear in the output list.
         Their name must match the script's name for the character.
         If there are references to a band or musicians, list each musician separately with details including their instrument, wardrobe, and any unique features.
-        Maintain consistency with the script’s descriptions (or make the best assumptions if not explicitly stated).
+        Maintain consistency with the script's descriptions (or make the best assumptions if not explicitly stated).
         Use the provided song lyrics and tags as additional context when inferring character details.
         For the "imagePrompt" field:
         Synthesize all the character attributes (physical features, age, gender, height/build, distinctive features, wardrobe details, movement style, key accessories, and any scene-specific changes) into one complete, vivid visual description.
@@ -480,7 +555,7 @@ export class SceneTechnicalExtractor {
       title,
       lyrics,
       duration,
-      tags: tags.join(", "),
+      tags: (tags || []).join(", "),
       meanScenes,
     });
   }
@@ -504,7 +579,7 @@ export class SceneTechnicalExtractor {
     return await this.characterChain.invoke({
       script,
       lyrics,
-      tags: tags.join(", "),
+      tags: (tags || []).join(", "),
     });
   }
 
