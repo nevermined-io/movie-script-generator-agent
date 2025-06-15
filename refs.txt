@@ -1,0 +1,4 @@
+# Run locally
+Start Agent: npm run dev
+Run payment analysis: uv run analysis_py/payments_analysis.py
+Run visualization notebook: jupyter notebook then naviage to visualization/
