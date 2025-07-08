@@ -6,9 +6,10 @@ import {
   JsonOutputParser,
   StringOutputParser,
 } from "@langchain/core/output_parsers";
-import { IS_DUMMY, HELICONE_API_KEY } from "./config/env";
+import { IS_DUMMY } from "./config/env";
 import { Scene } from "./types";
 import { generateDeterministicAgentId, generateSessionId, logSessionInfo } from "./utils/utils";
+import { withHeliconeLangchain } from "./utils/heliconeWrapper";
 /**
  * A custom Runnable to extract pure JSON from an LLM response (AIMessage), ignoring
  * any text before or after the JSON block. This handles `content` that might be string or array.
@@ -102,18 +103,7 @@ export class SceneTechnicalExtractor {
     // Log session information
     logSessionInfo(this.agentId, this.sessionId, 'SceneTechnicalExtractor');
     
-    const llm = new ChatOpenAI({
-      model: "gpt-4o-mini",
-      apiKey,
-      configuration: {
-        baseURL: "https://oai.helicone.ai/v1",
-        defaultHeaders: {
-          "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-          "Helicone-Property-AgentId": this.agentId,
-          "Helicone-Property-SessionId": this.sessionId,
-        }
-      }
-    });
+    const llm = new ChatOpenAI(withHeliconeLangchain("gpt-4o-mini", apiKey, this.agentId, this.sessionId));
 
     this.scriptChain = RunnableSequence.from([
       ChatPromptTemplate.fromTemplate(`
