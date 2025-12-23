@@ -10,7 +10,7 @@
     "dev": "nodemon --watch src --exec ts-node src/main.ts"
   },
   "dependencies": {
-    "@langchain/core": "^0.3.19",
+    "@langchain/core": "^0.3.80",
     "@langchain/openai": "^0.3.14",
     "@nevermined-io/payments": "^0.8.0",
     "dotenv": "^16.4.5",
